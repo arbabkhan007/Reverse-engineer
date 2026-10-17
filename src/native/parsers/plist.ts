@@ -5,8 +5,10 @@ import type { JsonValue } from "../../domain/jsonValue.js";
 import {
   negativeZeroReal,
   negativeZeroRealLimitation,
+  nonFiniteRealLimitation,
   projectPlistValue,
   unknownDateLimitation,
+  unknownRealLimitation,
   type ProjectedPlistValue,
 } from "../../domain/apple/plistValue.js";
 import {
@@ -159,6 +161,14 @@ export const parsePlistJson = (
  */
 export const parsePlistXml = (
   output: string,
+  options: {
+    /**
+     * The format of the plist the XML was converted from. Only XML source text
+     * carries CFPropertyList's non-finite spellings as observed values; a
+     * binary double spelled by plutil's conversion stays an explicit unknown.
+     */
+    readonly sourceFormat?: "xml" | "binary" | "json" | "unknown";
+  } = {},
 ): Result<ParsedPlist, AnalysisOutputError> => {
   let projected: ProjectedPlistValue;
   let omittedPrototypeKeys: number;
@@ -167,7 +177,12 @@ export const parsePlistXml = (
     const decoded = parseXmlPropertyList(output);
     omittedPrototypeKeys = decoded.omittedPrototypeKeys;
     literals = decoded.numberLiterals;
-    projected = projectPlistValue(decoded.value);
+    projected = projectPlistValue(decoded.value, undefined, {
+      spelledNonFiniteReals:
+        options.sourceFormat === undefined || options.sourceFormat === "xml"
+          ? "observed"
+          : "unknown",
+    });
   } catch (cause: unknown) {
     return err(
       new AnalysisOutputError(
@@ -202,11 +217,12 @@ export const parsePlistXml = (
     bundle: projectPlistBundle(value),
     limitations: [
       'plutil cannot express this plist as JSON, so it was decoded from plutil\'s XML conversion; data and date values are typed objects such as { "$plist_type": "data", "base64": ... }.',
+      ...(projected.nonFiniteRealCount === 0
+        ? []
+        : [nonFiniteRealLimitation(projected.nonFiniteRealCount)]),
       ...(projected.unknownRealCount === 0
         ? []
-        : [
-            `${String(projected.unknownRealCount)} non-finite real value(s) are reported as { "$plist_type": "real", "value": null } because the XML decoder does not distinguish NaN from infinity.`,
-          ]),
+        : [unknownRealLimitation(projected.unknownRealCount)]),
       ...negativeZeroLimitations(projected.negativeZeroRealCount),
       ...(projected.unknownDateCount === 0
         ? []

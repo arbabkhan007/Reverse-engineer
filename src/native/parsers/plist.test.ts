@@ -183,3 +183,37 @@ it("reports XML numbers whose integer or real origin is ambiguous", () => {
     expect.stringContaining("2 number(s)"),
   ]);
 });
+
+it("keeps CFPropertyList's non-finite real spellings in XML evidence", () => {
+  const parsed = parsePlistXml(
+    "<plist><dict><key>Up</key><real>+infinity</real><key>Down</key><real>-INFINITY</real><key>Missing</key><real>nan</real><key>Overflow</key><real>1e999</real><key>Ratio</key><real>1.25</real></dict></plist>",
+  );
+  if (!parsed.ok) throw parsed.error;
+  expect(JSON.stringify(parsed.value.value)).toBe(
+    '{"Up":{"$plist_type":"real","value":"+infinity"},"Down":{"$plist_type":"real","value":"-infinity"},"Missing":{"$plist_type":"real","value":"nan"},"Overflow":{"$plist_type":"real","value":null},"Ratio":1.25}',
+  );
+  expect(parsed.value.limitations).toEqual([
+    expect.stringContaining("XML conversion"),
+    '3 non-finite real value(s) are reported as { "$plist_type": "real", "value": "<spelling>" } with the CFPropertyList spelling nan, +infinity or -infinity because a JSON number cannot carry them.',
+    '1 non-finite real value(s) are reported as { "$plist_type": "real", "value": null } because the decoder observed a non-finite number without a property-list spelling.',
+  ]);
+});
+
+it("keeps a conversion-spelled non-finite real unknown for a binary source", () => {
+  const xml =
+    '<?xml version="1.0" encoding="UTF-8"?><plist version="1.0"><dict><key>Ratio</key><real>+infinity</real></dict></plist>';
+  const observed = parsePlistXml(xml, { sourceFormat: "xml" });
+  const converted = parsePlistXml(xml, { sourceFormat: "binary" });
+  expect(observed.ok && observed.value.value).toEqual({
+    Ratio: { $plist_type: "real", value: "+infinity" },
+  });
+  expect(converted.ok && converted.value.value).toEqual({
+    Ratio: { $plist_type: "real", value: null },
+  });
+  expect(converted.ok && converted.value.limitations).toContain(
+    '1 non-finite real value(s) are reported as { "$plist_type": "real", "value": null } because the decoder observed a non-finite number without a property-list spelling.',
+  );
+  expect(converted.ok && converted.value.limitations).not.toContain(
+    expect.stringContaining("with the CFPropertyList spelling"),
+  );
+});
