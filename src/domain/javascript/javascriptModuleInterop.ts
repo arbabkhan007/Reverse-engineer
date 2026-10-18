@@ -11,6 +11,7 @@ import {
   type JavaScriptSemanticBindingState,
 } from "./javascriptSemanticState.js";
 import { semanticRequireOrigin } from "./javascriptSemanticRequireOrigin.js";
+import { semanticBindingAtRead } from "./javascriptSemanticMutationInitializers.js";
 import {
   childNodes,
   javaScriptAstChildKeys,
@@ -244,6 +245,7 @@ export const createSemanticModuleInterop = (
     const visited = new Set<string>();
     const argumentGroups: t.CallExpression["arguments"][] = [];
     const bindReads: t.Node[] = [];
+    const callableReads: t.Node[] = [];
     let opaqueArguments = false;
     let receiver: t.Node | undefined;
     let current = node;
@@ -274,8 +276,9 @@ export const createSemanticModuleInterop = (
       let bindingArguments: JavaScriptIntrinsicInvocation["arguments"] =
         expandJavaScriptInvocationArguments(current.arguments);
       let captured = capturedIntrinsic(current.callee);
-      let terminal = captured?.path.at(-1) === "bind";
-      let path: readonly string[] | undefined = captured?.path.slice(0, -1);
+      const calleePath = captured?.path ?? intrinsicPath(current.callee);
+      let terminal = calleePath?.at(-1) === "bind";
+      let path: readonly string[] | undefined = calleePath?.slice(0, -1);
       if (members.at(-1) === "bind") {
         // A direct .bind may continue a bound callable, without discarding members.
         if (!terminal && members.length !== 1) return undefined;
@@ -297,9 +300,14 @@ export const createSemanticModuleInterop = (
         bindTarget = invocation.receiver;
         bindingArguments = invocation.arguments;
         captured = capturedIntrinsic(bindTarget);
-        terminal = captured !== undefined;
-        path = captured?.path;
+        path = captured?.path ?? intrinsicPath(bindTarget);
+        terminal = path !== undefined;
       }
+      // A possible alias can still invoke an intrinsic through bind. Keep its
+      // effects when capture proof is unavailable, without proving arguments or
+      // weakening the stricter capture proof used for namespace helpers.
+      callableReads.push(current.callee, bindTarget);
+      opaqueArguments ||= terminal && captured === undefined;
       receiver = bindingArguments?.[0];
       const ownArguments = bindingArguments?.slice(1) ?? [];
       opaqueArguments ||=
@@ -327,6 +335,7 @@ export const createSemanticModuleInterop = (
       return {
         kind: opaqueArguments ? "opaque" : "known",
         path,
+        callableReads,
         ...(receiver === undefined ? {} : { receiver }),
         // Rebinding appends arguments to the earlier bound argument list.
         arguments: opaqueArguments
@@ -364,7 +373,19 @@ export const createSemanticModuleInterop = (
         return true;
       if (!t.isIdentifier(current)) return false;
       const binding = resolveSemanticBindingState(state, current, current.name);
-      const initializer = unprojectedInitializer(binding, state);
+      const selected =
+        binding === undefined
+          ? undefined
+          : semanticBindingAtRead(binding, current, state.parentsByNode);
+      const [initial] = selected?.binding.initializers ?? [];
+      const initializer =
+        unprojectedInitializer(binding, state) ??
+        (selected?.hasDefiniteInitializer &&
+        selected.binding.initializers.length === 1 &&
+        selected.binding.referenceInitializers.length === 0 &&
+        initial?.projection.length === 0
+          ? initial.node
+          : undefined);
       if (
         binding === undefined ||
         initializer === undefined ||
