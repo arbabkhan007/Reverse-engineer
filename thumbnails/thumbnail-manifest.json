@@ -1,0 +1,482 @@
+[
+  {
+    "key": "bakery",
+    "file": "existing-listings/bakery.png",
+    "title": "Cottage Bakery Business Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 178653,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Recipe costing",
+      "Bakery inventory",
+      "Order tracking",
+      "Profit tracker"
+    ]
+  },
+  {
+    "key": "bookkeeping",
+    "file": "existing-listings/bookkeeping.png",
+    "title": "Small Business Bookkeeping Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 177959,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Income & expense",
+      "Profit & loss",
+      "Tax prep",
+      "Cash flow"
+    ]
+  },
+  {
+    "key": "catering",
+    "file": "existing-listings/catering.png",
+    "title": "Catering Business Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 162071,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Event planner",
+      "Food cost calculator",
+      "Client invoice",
+      "Profit tracker"
+    ]
+  },
+  {
+    "key": "christmas-gifts",
+    "file": "existing-listings/christmas-gifts.png",
+    "title": "Christmas Gift Tracker 2026",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 162046,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Gift list",
+      "Holiday budget",
+      "Shipping deadlines",
+      "Sinking fund"
+    ]
+  },
+  {
+    "key": "church",
+    "file": "existing-listings/church.png",
+    "title": "Church Management Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 174725,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Member directory",
+      "Tithe & donations",
+      "Volunteer schedule",
+      "Church records"
+    ]
+  },
+  {
+    "key": "cleaning-concept",
+    "file": "new-product-concepts/cleaning-concept.png",
+    "title": "Cleaning Business Spreadsheet",
+    "concept_only": true,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 159914,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Client quote calculator",
+      "Recurring schedule",
+      "Supplies cost",
+      "Invoice tracker"
+    ]
+  },
+  {
+    "key": "construction",
+    "file": "existing-listings/construction.png",
+    "title": "Construction Estimate Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 165079,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Job costing",
+      "Bid proposals",
+      "Material takeoff",
+      "Profit tracker"
+    ]
+  },
+  {
+    "key": "craft-fair",
+    "file": "existing-listings/craft-fair.png",
+    "title": "Craft Fair Tracker Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 160742,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Vendor sales",
+      "Inventory log",
+      "Yarn cost",
+      "Pricing calculator"
+    ]
+  },
+  {
+    "key": "etsy-seller",
+    "file": "existing-listings/etsy-seller.png",
+    "title": "Etsy Seller Spreadsheet Kit \u00b7 11 Templates",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 170349,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Profit & fees",
+      "Inventory",
+      "Order tracker",
+      "SEO keyword log"
+    ]
+  },
+  {
+    "key": "food-truck-concept",
+    "file": "new-product-concepts/food-truck-concept.png",
+    "title": "Food Truck Business Spreadsheet",
+    "concept_only": true,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 167683,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Recipe costing",
+      "Menu pricing",
+      "Daily sales log",
+      "Route & event log"
+    ]
+  },
+  {
+    "key": "investment",
+    "file": "existing-listings/investment.png",
+    "title": "Rental Property Investment Analyzer",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 172312,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Cap rate",
+      "Cash flow",
+      "Cash-on-cash",
+      "DSCR & BRRRR"
+    ]
+  },
+  {
+    "key": "lifestyle",
+    "file": "existing-listings/lifestyle.png",
+    "title": "Lifestyle Planner Spreadsheet Bundle",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 165584,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Meal planner",
+      "Habit tracker",
+      "Fitness log",
+      "Water & budget"
+    ]
+  },
+  {
+    "key": "meal-planner",
+    "file": "existing-listings/meal-planner.png",
+    "title": "Excel Meal Planner Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 165206,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Weekly menu",
+      "Auto grocery list",
+      "Recipe organizer",
+      "Nutrition & macros"
+    ]
+  },
+  {
+    "key": "mega-bundle",
+    "file": "existing-listings/mega-bundle.png",
+    "title": "50 Spreadsheet Mega Bundle",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 168101,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "50 templates",
+      "Business tools",
+      "Personal finance",
+      "Invoice & inventory"
+    ]
+  },
+  {
+    "key": "personal-finance",
+    "file": "existing-listings/personal-finance.png",
+    "title": "Personal Finance Spreadsheet Bundle",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 170700,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Budget by paycheck",
+      "Debt snowball",
+      "Savings goals",
+      "Net worth"
+    ]
+  },
+  {
+    "key": "pet-sitting",
+    "file": "existing-listings/pet-sitting.png",
+    "title": "Pet Sitting Business Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 167537,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Client booking",
+      "Payment tracker",
+      "Mileage log",
+      "Income & profit"
+    ]
+  },
+  {
+    "key": "photography-concept",
+    "file": "new-product-concepts/photography-concept.png",
+    "title": "Photography Business Spreadsheet",
+    "concept_only": true,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 172555,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Client pipeline",
+      "Package pricing",
+      "Shot list",
+      "Delivery & invoice"
+    ]
+  },
+  {
+    "key": "renovation",
+    "file": "existing-listings/renovation.png",
+    "title": "Home Renovation Budget Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 180501,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Remodel estimate",
+      "Quote comparison",
+      "Room-by-room budget",
+      "Expense tracker"
+    ]
+  },
+  {
+    "key": "rental",
+    "file": "existing-listings/rental.png",
+    "title": "Rental Property Management Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 172497,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Tenant & lease",
+      "Rent roll",
+      "Maintenance log",
+      "Landlord dashboard"
+    ]
+  },
+  {
+    "key": "salon-concept",
+    "file": "new-product-concepts/salon-concept.png",
+    "title": "Salon Business Spreadsheet for Hairstylists",
+    "concept_only": true,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 164783,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Client booking",
+      "Appointment log",
+      "Commission tracker",
+      "Retail inventory"
+    ]
+  },
+  {
+    "key": "school",
+    "file": "existing-listings/school.png",
+    "title": "School Management Spreadsheet for Teachers",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 174976,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Student roster",
+      "Attendance",
+      "Fees tracking",
+      "Gradebook"
+    ]
+  },
+  {
+    "key": "secret-santa",
+    "file": "existing-listings/secret-santa.png",
+    "title": "Secret Santa & White Elephant Tracker",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 171855,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Name picker",
+      "Budget rules",
+      "Party planner",
+      "Gift exchange"
+    ]
+  },
+  {
+    "key": "travel",
+    "file": "existing-listings/travel.png",
+    "title": "Travel Planner Spreadsheet",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 159847,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Trip itinerary",
+      "Vacation budget",
+      "Packing list",
+      "Countdown"
+    ]
+  },
+  {
+    "key": "wedding",
+    "file": "existing-listings/wedding.png",
+    "title": "Wedding Planner Spreadsheet \u00b7 52 Tabs",
+    "concept_only": false,
+    "width": 3000,
+    "height": 3000,
+    "bytes": 174909,
+    "format": "PNG / RGB / opaque",
+    "safe_content_band_y": [
+      375,
+      2625
+    ],
+    "features": [
+      "Wedding budget",
+      "Guest list",
+      "Seating chart",
+      "Vendor tracker"
+    ]
+  }
+]
