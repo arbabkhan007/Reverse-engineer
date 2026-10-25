@@ -1,0 +1,18 @@
+{
+  "name": "Crochet Studio",
+  "short_name": "Studio",
+  "description": "Pattern library, stitch-maths checker, yarn planner and symbol charts. Works offline.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf6ec",
+  "theme_color": "#c2643c",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
