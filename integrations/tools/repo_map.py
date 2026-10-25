@@ -331,18 +331,89 @@ def main() -> int:
                 keys = " (unparseable json)"
         print(f"  {f.relative_to(root)} ({human(size)}){keys}")
 
+    section("9. REPO HYGIENE")
+    tracked = sh("git", "ls-tree", "-r", "-l", "HEAD", cwd=root)
+    tracked_files: list[tuple[int, str]] = []
+    for line in tracked.splitlines():
+        match = re.match(r"\S+ blob \S+\s+(\d+)\t(.+)$", line)
+        if match:
+            tracked_files.append((int(match.group(1)), match.group(2)))
+
+    problems: list[str] = []
+    venv_hits = [p for _, p in tracked_files if re.match(r"^(\.?venv|venv|env|node_modules)/", p)]
+    if venv_hits:
+        problems.append(
+            f"{len(venv_hits)} files tracked from a virtualenv or node_modules "
+            f"(for example {venv_hits[0]}). These are reinstallable and should not be in git."
+        )
+
+    git_dir = root / ".git"
+    git_bytes = 0
+    if git_dir.is_dir():
+        for dirpath, _, filenames in os.walk(git_dir):
+            for name in filenames:
+                try:
+                    git_bytes += (Path(dirpath) / name).stat().st_size
+                except OSError:
+                    pass
+    tree_bytes = sum(size for size, _ in tracked_files)
+    if git_bytes > 200 * 1024 * 1024:
+        problems.append(
+            f".git is {human(git_bytes)} while the tracked tree is {human(tree_bytes)}. "
+            "History carries large binaries; the working tree will look small by comparison."
+        )
+
+    big = sorted(tracked_files, reverse=True)[:10]
+    if big and big[0][0] > 1_000_000:
+        print(f"largest tracked files (tree total {human(tree_bytes)}):")
+        for size, path in big:
+            if size > 500_000:
+                print(f"  {human(size):>8}  {path}")
+        if big[0][0] > 100_000_000:
+            problems.append(
+                f"{big[0][1]} is {human(big[0][0])}, above GitHub's 100 MB per-file limit. "
+                "Pushing a branch that contains it will be rejected."
+            )
+    else:
+        print(f"tracked tree: {human(tree_bytes)}, no file above 1 MB")
+    print(f".git directory: {human(git_bytes)}")
+
+    ahead_behind = sh("git", "rev-list", "--left-right", "--count", "HEAD...@{upstream}", cwd=root)
+    if ahead_behind:
+        parts = ahead_behind.split()
+        if len(parts) == 2:
+            ahead, behind = parts
+            print(f"upstream divergence: ahead {ahead}, behind {behind}")
+            if int(behind) > 0 and int(ahead) > 0:
+                problems.append(
+                    f"This branch is {ahead} ahead and {behind} behind its upstream. "
+                    "It is a divergent lineage, not a stale copy - review before merging or rebasing."
+                )
+            elif int(behind) > 0:
+                problems.append(
+                    f"This branch is {behind} commits behind its upstream. Content read here may "
+                    "not match what the remote holds."
+                )
+
+    if problems:
+        print("\nfindings:")
+        for item in problems:
+            print(f"  ! {item}")
+    else:
+        print("\nno hygiene problems found")
+
     if brief:
         print()
         print("=" * 74)
         print("END OF REPORT")
         return 0
 
-    section("9. DOMAIN TERM FREQUENCY (source only)")
+    section("10. DOMAIN TERM FREQUENCY (source only)")
     source_text = "\n".join(read(f) for f in py_files if "tests/" not in str(f)).lower()
     counts = Counter({t: len(re.findall(t, source_text)) for t in set(DOMAIN_TERMS)})
     print("  " + ", ".join(f"{t}×{n}" for t, n in counts.most_common(18) if n))
 
-    section("10. LARGEST SOURCE FILES")
+    section("11. LARGEST SOURCE FILES")
     for f in sorted(py_files, key=lambda p: p.stat().st_size if p.exists() else 0, reverse=True)[:8]:
         print(f"  {human(f.stat().st_size)}  {f.relative_to(root)}  ({len(read(f).splitlines())} lines)")
 
