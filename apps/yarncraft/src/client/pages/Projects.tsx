@@ -5,6 +5,7 @@ import { useStore } from '../store.tsx';
 import { navigate, useRoute } from '../lib/router.ts';
 import { StepRow } from '../components/PatternBits.tsx';
 import { Chip, Modal, useToast } from '../components/ui.tsx';
+import { useSpeech } from '../lib/speech.ts';
 
 export function ProjectsPage() {
   const { parts, query } = useRoute();
@@ -163,6 +164,78 @@ function ProjectCard({ project }: { project: Project }) {
   );
 }
 
+/**
+ * Hands-free reading: reads the current row aloud and lets the maker advance
+ * without touching the screen beyond one large target.
+ */
+function SpeakBar({
+  steps,
+  currentIndex,
+}: {
+  steps: Array<{ label: string; text: string }>;
+  currentIndex: number;
+}) {
+  const speech = useSpeech();
+  const [index, setIndex] = useState(Math.max(0, currentIndex));
+
+  if (!speech.supported || steps.length === 0) return null;
+  const step = steps[Math.min(index, steps.length - 1)];
+  if (!step) return null;
+
+  return (
+    <div className="speak-bar" style={{ marginBottom: 12 }}>
+      <button
+        className="btn sm dark"
+        onClick={() => speech.speak(`${step.label}. ${step.text}`, index)}
+      >
+        {speech.speaking ? '⏸ Stop' : '▶ Read row'}
+      </button>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div className="label">{step.label}</div>
+        <div className="tiny" style={{ color: '#26526a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {step.text}
+        </div>
+      </div>
+      <button
+        className="btn ghost sm"
+        onClick={() => {
+          const next = Math.max(0, index - 1);
+          setIndex(next);
+          const target = steps[next];
+          if (target) speech.speak(`${target.label}. ${target.text}`, next);
+        }}
+        aria-label="Previous row"
+      >
+        ‹
+      </button>
+      <button
+        className="btn ghost sm"
+        onClick={() => {
+          const next = Math.min(steps.length - 1, index + 1);
+          setIndex(next);
+          const target = steps[next];
+          if (target) speech.speak(`${target.label}. ${target.text}`, next);
+        }}
+        aria-label="Next row"
+      >
+        ›
+      </button>
+      <label className="tiny" style={{ color: '#26526a' }}>
+        speed
+        <input
+          type="range"
+          min={0.5}
+          max={1.4}
+          step={0.1}
+          value={speech.rate}
+          onChange={(event) => speech.setRate(Number(event.target.value))}
+          aria-label="Speech rate"
+        />
+      </label>
+    </div>
+  );
+}
+
 function ProjectDetail({ project }: { project: Project }) {
   const { completeStep, updateProject, deleteProject, addElapsed } = useStore();
   const toast = useToast();
@@ -292,6 +365,12 @@ function ProjectDetail({ project }: { project: Project }) {
               <h3>Rows</h3>
               <span className="meta">{done} done</span>
             </div>
+            <SpeakBar
+              steps={project.steps.map((step) => ({ label: step.label, text: step.instruction }))}
+              currentIndex={
+                nextStep ? project.steps.findIndex((step) => step.index === nextStep.index) : 0
+              }
+            />
             <div className="steps">
               {project.steps.slice(0, 60).map((step) => (
                 <StepRow

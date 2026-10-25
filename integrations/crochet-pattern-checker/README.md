@@ -45,7 +45,14 @@ Open the forwarded port 8000 and go to `/studio/`. The original checker UI at `/
 
 Verified against a fresh clone of `main`: patch applies, `npm run build` succeeds, `/studio` mounts,
 `POST /api/check` responds, `POST /api/import/url` refuses private targets, and the suite reports
-**281 passed** (245 existing + 36 new).
+**281 passed** (245 existing + 36 new), and the studio's own **60 tests** pass.
+
+### Features in the studio
+
+Pattern library (526 patterns), stitch-maths checker, PDF and web import, row counter with making
+time, photo texture aid, pattern canvas, five courses, **US/UK dialect translator with a count-safety
+check**, **gauge and sizing calculator**, **image-to-chart converter**, **hands-free read-aloud**, and
+a print stylesheet.
 
 ### Why `/api/import/url` is included
 

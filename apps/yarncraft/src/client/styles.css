@@ -455,3 +455,31 @@ input:focus, select:focus, textarea:focus { border-color: var(--terracotta); out
   .step { grid-template-columns: 30px minmax(0, 1fr); }
   .step .counts { grid-column: 2; flex-direction: row; align-items: center; gap: 8px; }
 }
+
+
+/* ------------------------------------------------------------------ print */
+
+@media print {
+  .topbar, .nav, footer, .btn, .toast, .modal-backdrop, .dropzone { display: none !important; }
+  body { background: #fff; color: #000; font-size: 11pt; }
+  .main { max-width: none; padding: 0; }
+  .card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+  .split { display: block; }
+  .split > * { margin-bottom: 12pt; }
+  .step { break-inside: avoid; page-break-inside: avoid; }
+  .step .tick { border-color: #999; }
+  a { color: #000; text-decoration: none; }
+}
+
+/* ------------------------------------------------------------- chart grid */
+
+.chart-legend { display: flex; flex-wrap: wrap; gap: 10px; }
+.swatch { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--line-strong); display: inline-block; }
+
+.speak-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: var(--radius);
+  background: var(--sky-soft); border: 1px solid #c6dde6;
+}
+.speak-bar .label { font-size: 0.8rem; color: #26526a; font-weight: 600; }
+.speak-bar input[type='range'] { width: 110px; accent-color: var(--sky); }

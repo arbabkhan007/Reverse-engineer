@@ -14,7 +14,7 @@ import { registerApiRoutes, registerErrorHandler } from './app.ts';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, '../..');
-const port = Number(process.env.PORT ?? 5173);
+const port = Number(process.env.PORT ?? 5180);
 
 const app = express();
 app.use(express.json({ limit: '6mb' }));

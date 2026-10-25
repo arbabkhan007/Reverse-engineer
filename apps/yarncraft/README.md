@@ -3,8 +3,11 @@
 An original crochet and knitting companion: pattern library, stitch-maths checker, PDF and web
 converter, row counter, photo stitch identification, and a pattern canvas.
 
-This app is a **standalone module**. It lives entirely under `apps/yarncraft/` and does not import
-from, modify, or depend on the REA toolkit at the repository root.
+This app lives at `web/studio/` and is mounted by the repository's FastAPI app at `/studio`.
+
+**The Python engine in `src/crochet_checker/` remains the authoritative checker.** The studio calls
+`POST /api/check` and displays that result; it does not replace or reimplement validation. The score
+shown at the top of the studio's checker page is a browser-side pre-check, and the UI says so.
 
 ## Why this exists
 
@@ -80,14 +83,29 @@ rows generated 7036 | rows whose stated count was verified 6965
 
 ## Running it
 
+Standalone development (client and its own API on one port):
+
 ```bash
-cd apps/yarncraft
+cd web/studio
 npm install
-npm run dev        # http://localhost:5173 - one port, API and client together
-npm run build      # production bundle in dist/
-npm start          # serve dist/ with the API on PORT (default 4173)
+npm run dev        # http://localhost:5180
+```
+
+Served by the FastAPI app, alongside the Python checker:
+
+```bash
+cd web/studio && npm run build          # bundle in web/studio/dist
+STUDIO_BASE=/studio/ npm run build      # bundle with sub-path asset URLs
+cd .. && cd .. && uvicorn crochet_checker.web.app:app --port 8000
+# open http://localhost:8000/studio/
+```
+
+Checks:
+
+```bash
 npm test           # 28 domain and server tests
 npm run typecheck
+npm run build
 ```
 
 The dev server attaches Vite's HMR websocket to the same HTTP server, so there is a single listening

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { parsePattern, serialisePattern } from '../../domain/patternParser.ts';
 import { summarise } from '../../domain/checkerSummary.ts';
 import { estimateYarn } from '../../domain/patternGenerator.ts';
@@ -7,7 +7,14 @@ import { AMIGURUMI_BALL, BROKEN_COUNTS, FLAT_WASHCLOTH, MESSY_PDF_TEXT } from '.
 import { useStore, uid } from '../store.tsx';
 import { navigate } from '../lib/router.ts';
 import { DiagnosticList, StepRow } from '../components/PatternBits.tsx';
-import { useToast } from '../components/ui.tsx';
+import { Chip, useToast } from '../components/ui.tsx';
+import {
+  checkWithPythonEngine,
+  describePythonResult,
+  probePythonEngine,
+  type EngineState,
+  type PythonCheckResult,
+} from '../lib/pyEngine.ts';
 
 const SAMPLES: Array<{ label: string; text: string; note: string }> = [
   { label: 'Clean amigurumi', text: AMIGURUMI_BALL, note: 'All counts correct' },
@@ -23,6 +30,14 @@ export function CheckerPage() {
   const [craft, setCraft] = useState<'auto' | 'crochet' | 'knitting'>('auto');
   const [onlyProblems, setOnlyProblems] = useState(false);
   const [showGlossary, setShowGlossary] = useState(false);
+  const [engine, setEngine] = useState<EngineState | null>(null);
+  const [pyResult, setPyResult] = useState<PythonCheckResult | null>(null);
+  const [pyBusy, setPyBusy] = useState(false);
+  const [pyError, setPyError] = useState<string | null>(null);
+
+  useEffect(() => {
+    void probePythonEngine().then(setEngine);
+  }, []);
 
   const parsed = useMemo(
     () => parsePattern(text, craft === 'auto' ? {} : { craft }),
@@ -48,6 +63,19 @@ export function CheckerPage() {
       createdAt: Date.now(),
     });
     toast.show('Saved to your patterns');
+  };
+
+  const runPythonCheck = async () => {
+    setPyBusy(true);
+    setPyError(null);
+    try {
+      setPyResult(await checkWithPythonEngine(text));
+    } catch (error) {
+      setPyResult(null);
+      setPyError(error instanceof Error ? error.message : 'The Python engine failed');
+    } finally {
+      setPyBusy(false);
+    }
   };
 
   const copyClean = async () => {
@@ -157,7 +185,86 @@ export function CheckerPage() {
 
         <div className="stack">
           <div className="card">
-            <div className="card-title"><h3>Report</h3></div>
+            <div className="card-title">
+              <h3>Python engine</h3>
+              {engine?.available ? <Chip tone="sage">connected</Chip> : <Chip outline>offline</Chip>}
+            </div>
+            <p className="tiny muted" style={{ marginTop: 0 }}>
+              The repository's <span className="mono">crochet_checker</span> engine is authoritative for
+              parsing, validation and measurement. The report below comes from that engine; the score at
+              the top of this page is only the browser's local pre-check.
+            </p>
+            {engine && !engine.available && (
+              <div className="callout info">
+                {engine.reason} Start it with{' '}
+                <span className="mono small">uvicorn crochet_checker.web.app:app --port 8000</span>{' '}
+                and open this studio from that server at <span className="mono small">/studio</span>.
+              </div>
+            )}
+            <button
+              className="btn primary block"
+              style={{ marginTop: 10 }}
+              onClick={runPythonCheck}
+              disabled={pyBusy || !engine?.available || text.trim().length === 0}
+            >
+              {pyBusy ? 'Running the Python engine…' : 'Verify with the Python engine'}
+            </button>
+            {pyError && <div className="callout bad" style={{ marginTop: 12 }}>{pyError}</div>}
+            {pyResult && (
+              <div style={{ marginTop: 12 }}>
+                <div className="row" style={{ alignItems: 'baseline', gap: 10 }}>
+                  <span
+                    className="chip"
+                    style={{
+                      background: pyResult.status === 'PASS' ? 'var(--sage-soft)' : 'var(--rose-soft)',
+                      color: pyResult.status === 'PASS' ? '#38512f' : '#7d2d3a',
+                      fontWeight: 700,
+                    }}
+                  >
+                    {pyResult.status}
+                  </span>
+                  <span className="small muted">{describePythonResult(pyResult)}</span>
+                </div>
+                <table className="table" style={{ marginTop: 8 }}>
+                  <tbody>
+                    <tr><td className="faint">Score</td><td className="num">{pyResult.score}</td></tr>
+                    <tr><td className="faint">Rounds</td><td className="num">{pyResult.rounds}</td></tr>
+                    <tr><td className="faint">Max stitches</td><td className="num">{pyResult.max_stitches}</td></tr>
+                    <tr><td className="faint">Max diameter</td><td className="num">{pyResult.max_diameter_inches} in</td></tr>
+                    <tr><td className="faint">Total height</td><td className="num">{pyResult.total_height_inches} in</td></tr>
+                  </tbody>
+                </table>
+                {pyResult.errors.length > 0 && (
+                  <>
+                    <h4 style={{ marginTop: 10, marginBottom: 4 }}>Errors</h4>
+                    {pyResult.errors.map((error, index) => (
+                      <div className="diag error" key={index}>
+                        <div>{error.message}</div>
+                        {error.location && <div className="hint">{error.location}</div>}
+                      </div>
+                    ))}
+                  </>
+                )}
+                {pyResult.warnings.length > 0 && (
+                  <>
+                    <h4 style={{ marginTop: 10, marginBottom: 4 }}>Warnings</h4>
+                    {pyResult.warnings.map((warning, index) => (
+                      <div className="diag warning" key={index}>
+                        <div>{warning.message}</div>
+                        {warning.location && <div className="hint">{warning.location}</div>}
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="card">
+            <div className="card-title">
+              <h3>Local pre-check</h3>
+              <span className="meta">browser only</span>
+            </div>
             <div className="row" style={{ alignItems: 'flex-end', gap: 16 }}>
               <div className="stat">
                 <span className="value" style={{ color: summary.errors > 0 ? 'var(--rose)' : 'var(--sage)' }}>

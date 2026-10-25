@@ -9,6 +9,9 @@ import { StitchIdPage } from './pages/StitchId.tsx';
 import { CanvasPage } from './pages/Canvas.tsx';
 import { CoursesPage } from './pages/Courses.tsx';
 import { SettingsPage } from './pages/Settings.tsx';
+import { TerminologyPage } from './pages/Terminology.tsx';
+import { GaugePage } from './pages/Gauge.tsx';
+import { ImageChartPage } from './pages/ImageChart.tsx';
 
 const NAV = [
   { href: '/library', label: 'Patterns' },
@@ -17,6 +20,9 @@ const NAV = [
   { href: '/projects', label: 'Projects' },
   { href: '/stitch-id', label: 'Stitch ID' },
   { href: '/canvas', label: 'Canvas' },
+  { href: '/chart', label: 'Chart' },
+  { href: '/gauge', label: 'Gauge' },
+  { href: '/terminology', label: 'US/UK' },
   { href: '/courses', label: 'Learn' },
 ];
 
@@ -32,6 +38,9 @@ export function App() {
   else if (root === 'projects') page = <ProjectsPage />;
   else if (root === 'stitch-id') page = <StitchIdPage />;
   else if (root === 'canvas') page = <CanvasPage />;
+  else if (root === 'chart') page = <ImageChartPage />;
+  else if (root === 'gauge') page = <GaugePage />;
+  else if (root === 'terminology') page = <TerminologyPage />;
   else if (root === 'courses') page = <CoursesPage />;
   else if (root === 'settings') page = <SettingsPage />;
 

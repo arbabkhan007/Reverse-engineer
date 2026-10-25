@@ -2,7 +2,7 @@
   "name": "@rea/yarncraft",
   "version": "1.0.0",
   "private": true,
-  "description": "YarnCraft Studio - an original, offline-first crochet & knitting companion: pattern library, row counter, pattern checker, PDF/web converter, stitch identification, and pattern canvas.",
+  "description": "Crochet Studio - a web companion for the Crochet Pattern Checker: pattern library, row counter, PDF/web import, stitch identification, pattern canvas, and courses. The Python checker remains the authoritative engine.",
   "type": "module",
   "scripts": {
     "dev": "node --experimental-strip-types src/server/dev.ts",

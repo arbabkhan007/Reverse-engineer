@@ -3,6 +3,8 @@ import react from '@vitejs/plugin-react';
 import { fileURLToPath } from 'node:url';
 
 export default defineConfig({
+  // When served by FastAPI under a sub-path, build with STUDIO_BASE=/studio/.
+  base: process.env.STUDIO_BASE ?? '/',
   plugins: [react()],
   resolve: {
     alias: {
