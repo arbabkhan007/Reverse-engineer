@@ -37,9 +37,20 @@ Open the forwarded port 8000 and go to `/studio/`. The original checker UI at `/
 | Path | Change |
 | --- | --- |
 | `web/studio/**` | new: the React/TypeScript companion (48 files) |
-| `src/crochet_checker/web/app.py` | mount `web/studio/dist` at `/studio` when it exists |
+| `src/crochet_checker/web/app.py` | mount `web/studio/dist` at `/studio` when it exists; add `POST /api/import/url` |
+| `src/crochet_checker/web/import_url.py` | new: SSRF-guarded page fetch and HTML-to-text |
+| `tests/test_import_url.py` | new: 36 tests, mostly guard refusals and fetch limits |
 | `.gitignore` | ignore the module's `node_modules/` and `dist/`; re-include `src/client/lib/` |
 | `README.md` | a short "Web companion" section |
 
 Verified against a fresh clone of `main`: patch applies, `npm run build` succeeds, `/studio` mounts,
-`POST /api/check` responds, and the repository's own `pytest` suite still reports 245 passed.
+`POST /api/check` responds, `POST /api/import/url` refuses private targets, and the suite reports
+**281 passed** (245 existing + 36 new).
+
+### Why `/api/import/url` is included
+
+The studio's web converter posts to `/api/import/url`. Mounted under FastAPI that endpoint did not
+exist, so the feature was broken in the deployment this README describes. It is now served by Python
+with an SSRF guard: scheme allowlist, DNS resolution with private/loopback/link-local/reserved
+refusal, re-validation on every redirect hop, and caps on redirects, bytes and time. It returns text
+only - `/api/check` still decides whether that text is a valid pattern.

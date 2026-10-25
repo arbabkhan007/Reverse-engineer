@@ -1,4 +1,4 @@
-From 94d72014ef540747582f0389166e1eb41e61e42c Mon Sep 17 00:00:00 2001
+From b0e335edce7451c47cc792bb75e0f60e21645e10 Mon Sep 17 00:00:00 2001
 From: Arena Agent <agent@arena.ai>
 Date: Sun, 25 Oct 2026 06:00:04 +0000
 Subject: [PATCH] feat(studio): add optional web companion under web/studio
@@ -28,7 +28,9 @@ Verification
 ---
  .gitignore                                    |    9 +
  README.md                                     |   24 +
- src/crochet_checker/web/app.py                |   12 +
+ src/crochet_checker/web/app.py                |   37 +
+ src/crochet_checker/web/import_url.py         |  275 ++
+ tests/test_import_url.py                      |  256 ++
  web/studio/README.md                          |  124 +
  web/studio/index.html                         |   14 +
  web/studio/package-lock.json                  | 3403 +++++++++++++++++
@@ -74,7 +76,9 @@ Verification
  web/studio/src/tests/patternChecker.test.ts   |   97 +
  web/studio/tsconfig.json                      |   25 +
  web/studio/vite.config.ts                     |   25 +
- 48 files changed, 12068 insertions(+)
+ 50 files changed, 12624 insertions(+)
+ create mode 100644 src/crochet_checker/web/import_url.py
+ create mode 100644 tests/test_import_url.py
  create mode 100644 web/studio/README.md
  create mode 100644 web/studio/index.html
  create mode 100644 web/studio/package-lock.json
@@ -174,7 +178,7 @@ index e0e3989..46c12d7 100644
  
  ```bash
 diff --git a/src/crochet_checker/web/app.py b/src/crochet_checker/web/app.py
-index 147ab7d..18e6773 100644
+index 147ab7d..23ab54b 100644
 --- a/src/crochet_checker/web/app.py
 +++ b/src/crochet_checker/web/app.py
 @@ -2,8 +2,11 @@
@@ -189,7 +193,13 @@ index 147ab7d..18e6773 100644
  from pydantic import BaseModel
  
  from ..parser.parser import CrochetParser
-@@ -18,6 +21,15 @@ from ..visualization import measure_pattern, render_2d_preview
+@@ -13,11 +16,21 @@ from ..simulation.assembly_map import assembly_map_svg, written_assembly
+ from ..simulation.geometry_map import geometry_map_svg, written_geometry
+ from ..simulation.stitch_sim import stitch_model_obj
+ from ..simulation.stitch_sim import simulate_stitches, stitch_map_svg
++from .import_url import ImportError_, import_pattern_page
+ from ..validation import validate_pattern
+ from ..visualization import measure_pattern, render_2d_preview
  
  app = FastAPI(title="Crochet Pattern Checker", version="0.5.0")
  
@@ -205,6 +215,580 @@ index 147ab7d..18e6773 100644
  
  class CheckRequest(BaseModel):
      pattern_text: str
+@@ -52,6 +65,30 @@ async def check_pattern(request: CheckRequest):
+         raise HTTPException(status_code=400, detail=str(e))
+ 
+ 
++class ImportUrlRequest(BaseModel):
++    url: str
++
++
++@app.post("/api/import/url")
++async def import_url(request: ImportUrlRequest):
++    """Fetch a public pattern page and return its text.
++
++    This returns text only. Whether that text is a pattern, and whether its
++    counts are consistent, is decided by /api/check - not here.
++    """
++    try:
++        page = import_pattern_page(request.url)
++    except ImportError_ as error:
++        raise HTTPException(status_code=error.status, detail=str(error)) from error
++    return {
++        "url": page.url,
++        "title": page.title,
++        "text": page.text,
++        "content_type": page.content_type,
++        "truncated": page.truncated,
++    }
++
++
+ @app.post("/api/upload")
+ async def upload_pattern(file: UploadFile = File(...)):
+     try:
+diff --git a/src/crochet_checker/web/import_url.py b/src/crochet_checker/web/import_url.py
+new file mode 100644
+index 0000000..8a23ea2
+--- /dev/null
++++ b/src/crochet_checker/web/import_url.py
+@@ -0,0 +1,275 @@
++"""Web pattern import with an SSRF guard.
++
++Fetching a user-supplied URL from the server is a classic SSRF sink, so this
++module resolves the host, refuses private and link-local targets, bounds
++redirects, bytes and time, and accepts only text-ish content types.
++
++The result is plain text handed to the existing parser. Nothing here parses,
++counts or validates a pattern: ``crochet_checker`` still owns that, and a page
++that yields no instructions simply yields no instructions.
++"""
++
++from __future__ import annotations
++
++import ipaddress
++import re
++import socket
++from dataclasses import dataclass
++from typing import Iterable
++from urllib.parse import urljoin, urlparse
++
++import httpx
++
++MAX_BYTES = 3 * 1024 * 1024
++TIMEOUT_SECONDS = 12.0
++MAX_REDIRECTS = 3
++ALLOWED_TYPES = (
++    "text/html",
++    "text/plain",
++    "application/xhtml+xml",
++    "text/markdown",
++)
++
++# Element class/id names that mark promotional or navigational blocks.
++_BLOCK_PATTERN = re.compile(
++    r"""(?:^|[\s"'])(?:ad|ads|advert\w*|adsbygoogle|promo\w*|banner|sidebar|"""
++    r"""share\w*|related\w*|newsletter|cookie\w*|comment\w*)(?:[\s"']|$)""",
++    re.IGNORECASE,
++)
++
++_DROP_ELEMENTS = re.compile(
++    r"<(script|style|noscript|svg|iframe|form|nav|footer|header)\b[\s\S]*?</\1>",
++    re.IGNORECASE,
++)
++_COMMENTS = re.compile(r"<!--[\s\S]*?-->")
++_BLOCK_ELEMENTS = re.compile(
++    r"<(div|aside|section|ul|span)\b([^>]*)>([\s\S]*?)</\1>",
++    re.IGNORECASE,
++)
++_BREAKS = re.compile(r"<br\s*/?>", re.IGNORECASE)
++_BLOCK_ENDS = re.compile(
++    r"</(p|div|li|h[1-6]|tr|section|article|blockquote)>", re.IGNORECASE
++)
++_LIST_ITEMS = re.compile(r"<li[^>]*>", re.IGNORECASE)
++_TAGS = re.compile(r"<[^>]+>")
++_TITLE = re.compile(r"<title[^>]*>([\s\S]*?)</title>", re.IGNORECASE)
++
++_ENTITIES = {
++    "amp": "&",
++    "lt": "<",
++    "gt": ">",
++    "quot": '"',
++    "apos": "'",
++    "nbsp": " ",
++    "ndash": "-",
++    "mdash": "-",
++    "rsquo": "'",
++    "lsquo": "'",
++    "ldquo": '"',
++    "rdquo": '"',
++    "hellip": "...",
++}
++
++
++class ImportError_(ValueError):
++    """A refusal or failure that is safe to show to the caller."""
++
++    def __init__(self, message: str, status: int = 400) -> None:
++        super().__init__(message)
++        self.status = status
++
++
++@dataclass(frozen=True)
++class ImportedPage:
++    url: str
++    title: str
++    text: str
++    content_type: str
++    truncated: bool
++
++
++def _is_public(address: str) -> bool:
++    try:
++        parsed = ipaddress.ip_address(address)
++    except ValueError:
++        return False
++    if (
++        parsed.is_private
++        or parsed.is_loopback
++        or parsed.is_link_local
++        or parsed.is_reserved
++        or parsed.is_multicast
++        or parsed.is_unspecified
++    ):
++        return False
++    # IPv4-mapped IPv6 must be judged on the embedded address.
++    if parsed.version == 6 and parsed.ipv4_mapped is not None:
++        return _is_public(str(parsed.ipv4_mapped))
++    return True
++
++
++def _resolve(hostname: str) -> list[str]:
++    try:
++        infos = socket.getaddrinfo(hostname, None)
++    except socket.gaierror as error:
++        raise ImportError_(f"Could not resolve {hostname}.", status=502) from error
++    return sorted({info[4][0] for info in infos})
++
++
++def _assert_public_url(raw_url: str) -> str:
++    parsed = urlparse(raw_url)
++    if parsed.scheme not in ("http", "https"):
++        raise ImportError_("Only http and https URLs can be imported.")
++    hostname = parsed.hostname or ""
++    if not hostname:
++        raise ImportError_("That is not a valid URL.")
++    lowered = hostname.lower()
++    if lowered == "localhost" or lowered.endswith((".local", ".internal")):
++        raise ImportError_("Local network addresses cannot be imported.")
++
++    addresses = _resolve(hostname)
++    if not addresses:
++        raise ImportError_(f"Could not resolve {hostname}.", status=502)
++    if not all(_is_public(address) for address in addresses):
++        raise ImportError_("Private addresses cannot be imported.")
++    return raw_url
++
++
++def _decode_entities(text: str) -> str:
++    def numeric(match: re.Match[str]) -> str:
++        code = match.group(1)
++        try:
++            return chr(int(code, 16) if code.lower().startswith("x") else int(code))
++        except (ValueError, OverflowError):
++            return match.group(0)
++
++    text = re.sub(r"&#(x?[0-9a-fA-F]+);", numeric, text)
++
++    def named(match: re.Match[str]) -> str:
++        return _ENTITIES.get(match.group(1).lower(), match.group(0))
++
++    return re.sub(r"&([a-zA-Z]+);", named, text)
++
++
++def _strip_block(match: re.Match[str]) -> str:
++    return " " if _BLOCK_PATTERN.search(match.group(2) or "") else match.group(0)
++
++
++def html_to_pattern_text(html: str) -> tuple[str, str]:
++    """Return ``(title, text)`` with navigation and promotional blocks removed."""
++    title_match = _TITLE.search(html)
++    title = _decode_entities(title_match.group(1)).strip() if title_match else ""
++
++    # Strip promotional blocks while their class/id attributes still exist.
++    body = _BLOCK_ELEMENTS.sub(_strip_block, html)
++    body = _DROP_ELEMENTS.sub(" ", body)
++    body = _COMMENTS.sub(" ", body)
++    body = _BREAKS.sub("\n", body)
++    body = _BLOCK_ENDS.sub("\n", body)
++    body = _LIST_ITEMS.sub("\u2022 ", body)
++    body = _TAGS.sub(" ", body)
++    body = _decode_entities(body)
++
++    lines: list[str] = []
++    for line in body.splitlines():
++        cleaned = re.sub(r"[ \t\u00a0]+", " ", line).strip()
++        if cleaned or (lines and lines[-1]):
++            lines.append(cleaned)
++
++    text = re.sub(r"\n{3,}", "\n\n", "\n".join(lines)).strip()
++    return title, text
++
++
++def _stream(response: httpx.Response) -> tuple[bytes, bool]:
++    chunks: list[bytes] = []
++    received = 0
++    truncated = False
++    for chunk in response.iter_bytes():
++        received += len(chunk)
++        if received > MAX_BYTES:
++            truncated = True
++            break
++        chunks.append(chunk)
++    return b"".join(chunks), truncated
++
++
++def import_pattern_page(
++    raw_url: str,
++    *,
++    transport: httpx.BaseTransport | None = None,
++) -> ImportedPage:
++    """Fetch a public page and reduce it to text. Raises ImportError_ on refusal.
++
++    ``transport`` exists for tests: it lets the fetch, redirect and size limits be
++    exercised without real network access. It must not be reachable from the API.
++    """
++    url = _assert_public_url(raw_url.strip())
++    truncated = False
++
++    with httpx.Client(
++        transport=transport,
++        timeout=TIMEOUT_SECONDS,
++        follow_redirects=False,
++        headers={
++            "User-Agent": "CrochetPatternChecker/1.0 (pattern importer)",
++            "Accept": "text/html,text/plain;q=0.9",
++            "Accept-Language": "en",
++        },
++    ) as client:
++        response: httpx.Response | None = None
++        for _ in range(MAX_REDIRECTS + 1):
++            try:
++                response = client.get(url)
++            except httpx.TimeoutException as error:
++                raise ImportError_("The site took too long to respond.", status=504) from error
++            except httpx.HTTPError as error:
++                raise ImportError_("Could not reach that site.", status=502) from error
++
++            if response.is_redirect:
++                location = response.headers.get("location")
++                if not location:
++                    raise ImportError_("The site sent an invalid redirect.", status=502)
++                url = _assert_public_url(urljoin(url, location))
++                continue
++            break
++
++        if response is None:
++            raise ImportError_("Could not reach that site.", status=502)
++        if response.status_code >= 400:
++            raise ImportError_(f"The site returned {response.status_code}.", status=502)
++
++        content_type = (
++            response.headers.get("content-type", "").split(";")[0].strip().lower()
++        )
++        if content_type not in ALLOWED_TYPES:
++            raise ImportError_(
++                "That link returns "
++                f"{content_type or 'an unknown type'}. Try a page URL, or download "
++                "the PDF and use the PDF tab.",
++                status=415,
++            )
++
++        payload, truncated = _stream(response)
++
++    text = payload.decode("utf-8", errors="replace")
++    if content_type in ("text/plain", "text/markdown"):
++        title = urlparse(url).path.rstrip("/").split("/")[-1] or urlparse(url).hostname or ""
++        return ImportedPage(url, title, text.strip(), content_type, truncated)
++
++    title, cleaned = html_to_pattern_text(text)
++    return ImportedPage(
++        url,
++        title or urlparse(url).hostname or "",
++        cleaned,
++        content_type,
++        truncated,
++    )
++
++
++def instruction_lines(text: str) -> Iterable[str]:
++    """Lines that look like written instructions. Used only for reporting counts."""
++    return (
++        line
++        for line in text.splitlines()
++        if re.match(r"^\s*(?:row|rnd|round|r)\s*\d+", line, re.IGNORECASE)
++    )
+diff --git a/tests/test_import_url.py b/tests/test_import_url.py
+new file mode 100644
+index 0000000..ecef1cc
+--- /dev/null
++++ b/tests/test_import_url.py
+@@ -0,0 +1,256 @@
++"""Tests for the web pattern importer and its SSRF guard.
++
++The guard is the risky part of this module, so the refusal cases are tested
++directly rather than through a live server.
++"""
++
++from __future__ import annotations
++
++import pytest
++
++from crochet_checker.web.import_url import (
++    ImportError_,
++    _assert_public_url,
++    _is_public,
++    html_to_pattern_text,
++    instruction_lines,
++)
++
++
++@pytest.mark.parametrize(
++    "address",
++    [
++        "127.0.0.1",
++        "10.1.2.3",
++        "172.16.0.1",
++        "192.168.1.1",
++        "169.254.169.254",  # cloud metadata
++        "0.0.0.0",
++        "::1",
++        "fe80::1",
++        "fc00::1",
++        "::ffff:127.0.0.1",
++    ],
++)
++def test_private_and_special_addresses_are_not_public(address: str) -> None:
++    assert _is_public(address) is False
++
++
++@pytest.mark.parametrize("address", ["93.184.216.34", "1.1.1.1", "2606:4700:4700::1111"])
++def test_public_addresses_are_public(address: str) -> None:
++    assert _is_public(address) is True
++
++
++@pytest.mark.parametrize(
++    "url",
++    [
++        "file:///etc/passwd",
++        "ftp://example.com/pattern",
++        "javascript:alert(1)",
++        "not a url",
++        "",
++    ],
++)
++def test_non_http_schemes_are_refused(url: str) -> None:
++    with pytest.raises(ImportError_):
++        _assert_public_url(url)
++
++
++@pytest.mark.parametrize(
++    "url",
++    [
++        "http://localhost/pattern",
++        "http://127.0.0.1/pattern",
++        "http://169.254.169.254/latest/meta-data/",
++        "http://10.0.0.5/pattern",
++        "http://printer.local/pattern",
++        "http://metadata.internal/pattern",
++    ],
++)
++def test_local_and_private_hosts_are_refused(url: str) -> None:
++    with pytest.raises(ImportError_):
++        _assert_public_url(url)
++
++
++def test_html_keeps_instructions_and_drops_furniture() -> None:
++    html = """
++    <html><head><title>Free Washcloth Pattern</title>
++    <style>.ad{color:red}</style></head>
++    <body>
++      <nav>Home | Shop | Blog</nav>
++      <script>tracking()</script>
++      <h1>Simple Washcloth</h1>
++      <p>Yarn: worsted cotton</p>
++      <p>Row 1: ch 21, sc in 2nd ch from hook and in each ch across (20)</p>
++      <div class="ad">BUY YARN NOW</div>
++      <p>Row 2: ch 1, turn, sc in each st across (20)</p>
++      <div id="sidebar">Related posts</div>
++      <footer>&copy; 2026</footer>
++    </body></html>
++    """
++    title, text = html_to_pattern_text(html)
++    assert title == "Free Washcloth Pattern"
++    assert "Row 1: ch 21" in text
++    assert "Row 2: ch 1" in text
++    assert "tracking()" not in text
++    assert "BUY YARN NOW" not in text
++    assert "Related posts" not in text
++    assert "Home | Shop" not in text
++
++
++def test_html_decodes_entities_so_counts_survive() -> None:
++    _, text = html_to_pattern_text("<p>sc in each st &ndash; 20 sts&hellip;</p>")
++    assert "20 sts" in text
++    assert "\u2013" not in text  # ndash decoded
++
++
++def test_instruction_lines_finds_labelled_rows_only() -> None:
++    text = "Materials\nRow 1: ch 21 (20)\nnote: keep loose\nRound 2: sc around (20)"
++    found = list(instruction_lines(text))
++    assert len(found) == 2
++    assert found[0].startswith("Row 1")
++    assert found[1].startswith("Round 2")
++
++
++def test_import_of_plain_text_url_shape() -> None:
++    # A refusal must not leak a stack trace or a socket error message.
++    with pytest.raises(ImportError_) as caught:
++        _assert_public_url("http://127.0.0.1:8000/admin")
++    assert "Private addresses" in str(caught.value) or "Local network" in str(caught.value)
++
++
++# --- fetch, redirect and limit behaviour, without real network access -------
++
++import httpx
++
++from crochet_checker.web.import_url import MAX_BYTES, import_pattern_page
++
++PUBLIC = "93.184.216.34"
++
++
++def _handler_for(routes: dict[str, httpx.Response | tuple[int, dict[str, str]]]):
++    def handler(request: httpx.Request) -> httpx.Response:
++        key = str(request.url)
++        reply = routes.get(key)
++        if reply is None:
++            return httpx.Response(404)
++        if isinstance(reply, tuple):
++            status, headers = reply
++            return httpx.Response(status, headers=headers)
++        return reply
++
++    return handler
++
++
++def test_import_extracts_pattern_text_from_html() -> None:
++    html = (
++        "<html><head><title>Sock Pattern</title></head><body>"
++        "<nav>menu</nav><p>Row 1: ch 21 (20)</p></body></html>"
++    )
++    transport = httpx.MockTransport(
++        _handler_for(
++            {
++                "http://example.com/p": httpx.Response(
++                    200, text=html, headers={"content-type": "text/html"}
++                )
++            }
++        )
++    )
++    page = import_pattern_page("http://example.com/p", transport=transport)
++    assert page.title == "Sock Pattern"
++    assert "Row 1: ch 21" in page.text
++    assert "menu" not in page.text
++    assert page.truncated is False
++
++
++def test_import_rejects_non_text_content_type() -> None:
++    transport = httpx.MockTransport(
++        _handler_for(
++            {
++                "http://example.com/f.pdf": httpx.Response(
++                    200, headers={"content-type": "application/pdf"}, content=b"%PDF-1.4"
++                )
++            }
++        )
++    )
++    with pytest.raises(ImportError_) as caught:
++        import_pattern_page("http://example.com/f.pdf", transport=transport)
++    assert "PDF" in str(caught.value)
++    assert caught.value.status == 415
++
++
++def test_import_refuses_redirect_into_private_space() -> None:
++    transport = httpx.MockTransport(
++        _handler_for(
++            {
++                "http://example.com/go": (
++                    302,
++                    {"location": "http://127.0.0.1/secret"},
++                )
++            }
++        )
++    )
++    with pytest.raises(ImportError_):
++        import_pattern_page("http://example.com/go", transport=transport)
++
++
++def test_import_follows_public_redirect() -> None:
++    transport = httpx.MockTransport(
++        _handler_for(
++            {
++                "http://example.com/a": (301, {"location": "http://example.com/b"}),
++                "http://example.com/b": httpx.Response(
++                    200,
++                    text="<title>B</title><p>Round 1: 6 sc (6)</p>",
++                    headers={"content-type": "text/html"},
++                ),
++            }
++        )
++    )
++    page = import_pattern_page("http://example.com/a", transport=transport)
++    assert page.title == "B"
++    assert "Round 1" in page.text
++
++
++def test_import_stops_after_too_many_redirects() -> None:
++    loop = {"http://example.com/loop": (302, {"location": "http://example.com/loop"})}
++    transport = httpx.MockTransport(_handler_for(loop))
++    with pytest.raises(ImportError_):
++        import_pattern_page("http://example.com/loop", transport=transport)
++
++
++def test_import_reports_server_error_without_leaking_detail() -> None:
++    transport = httpx.MockTransport(
++        _handler_for({"http://example.com/x": httpx.Response(500, text="traceback stuff")})
++    )
++    with pytest.raises(ImportError_) as caught:
++        import_pattern_page("http://example.com/x", transport=transport)
++    assert "traceback" not in str(caught.value)
++    assert "500" in str(caught.value)
++
++
++def test_import_truncates_oversized_bodies() -> None:
++    huge = "<p>" + ("sc in each st around " * ((MAX_BYTES // 20) + 1000)) + "</p>"
++    transport = httpx.MockTransport(
++        _handler_for(
++            {
++                "http://example.com/big": httpx.Response(
++                    200, text=huge, headers={"content-type": "text/html"}
++                )
++            }
++        )
++    )
++    page = import_pattern_page("http://example.com/big", transport=transport)
++    assert page.truncated is True
++    assert len(page.text) < len(huge)
++
++
++def test_import_refuses_a_response_with_no_content_type() -> None:
++    transport = httpx.MockTransport(
++        _handler_for(
++            {"http://example.com/raw": httpx.Response(200, content=b"<title>x</title>")}
++        )
++    )
++    with pytest.raises(ImportError_) as caught:
++        import_pattern_page("http://example.com/raw", transport=transport)
++    assert caught.value.status == 415
 diff --git a/web/studio/README.md b/web/studio/README.md
 new file mode 100644
 index 0000000..2034377
