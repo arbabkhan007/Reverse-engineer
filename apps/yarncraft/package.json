@@ -1,5 +1,5 @@
 {
-  "name": "@rea/yarncraft",
+  "name": "crochet-studio",
   "version": "1.0.0",
   "private": true,
   "description": "Crochet Studio - a web companion for the Crochet Pattern Checker: pattern library, row counter, PDF/web import, stitch identification, pattern canvas, and courses. The Python checker remains the authoritative engine.",

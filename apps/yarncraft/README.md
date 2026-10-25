@@ -34,6 +34,16 @@ reporting instead of confident-sounding guesses.
 | **Stitch identification** | Deterministic texture analysis: Sobel edge density, gradient orientation, and autocorrelation-derived stitch width and row height, scored against construction-based stitch profiles. Optional vision-model provider for a second opinion. |
 | **Pattern canvas** | Paint a stitch grid, get written instructions that the checker verifies, then save it as a pattern or a project. |
 | **Courses** | Five progressive courses, 19 lessons, from hook hold to blocking, with tips and stitch diagrams. |
+| **US / UK translator** | Rewrites a pattern between dialects in a single pass, then verifies that **no stitch count changed**. Each UK name is one step taller than its US counterpart. |
+| **Gauge & sizing** | Swatch to stitch/row counts, repeat rounding, flat-circle plans, and rescaling an existing pattern when your tension differs. |
+| **Image to chart** | Upload an image, get a reduced palette, a stitch grid and written colourwork rows whose numbers always sum to the chart width. |
+| **Read aloud** | Hands-free row reading with the browser's speech engine, one row at a time, with adjustable speed. |
+| **Print sheet** | A print stylesheet strips navigation and controls so any pattern prints as a clean working copy. |
+| **Yarn stash & planner** | Price a pattern from your own gauge, see how many skeins that means, and get told when the waste allowance is what pushes you over a skein boundary. Stash tracks length, weight and value. |
+| **Symbol charts** | Written rows become standard chart symbols, one cell per stitch, with repeat boundaries marked. Cells are weighted by how many stitches they make, so an increase is one cell worth two. |
+| **Journal** | Notes, measurements and progress photos per project, grouped by day. Photos are downscaled and evicted oldest-first before the storage quota is reached — and the page says when that happens. |
+| **Command palette** | Ctrl/⌘+K over every tool, all 526 patterns and every lesson. Word order doesn't matter and keyword-only matches never outrank a name. |
+| **Offline** | A service worker caches the app shell, so the studio opens with no signal. API calls are never cached: the Python checker is the authority and a stale verdict would be worse than none. |
 | **Optional AI** | Pluggable: offline (default), OpenAI, Anthropic, or an OpenAI-compatible gateway. Keys stay in the browser and are sent only to the provider you choose. |
 | **Backup** | Full state export/import as JSON. Everything is local-first; there is no account and no server database. |
 
@@ -81,9 +91,22 @@ patterns 526 | count errors 0 | crashes 0
 rows generated 7036 | rows whose stated count was verified 6965
 ```
 
+Dependency audit: **0 vulnerabilities** (Vite 8, Vitest 5, React 18).
+
+Studio tests: **117 passing**, covering the checker, generators, texture analysis, web import,
+dialect translation (round-trip and count-preservation), gauge maths, image charting, stitch
+tokenizing, yarn estimation, skein planning, symbol charts, journal budgets and palette ranking.
+
+The stitch tokenizer is tested *against* the maths engine, not just on its own: `[sc, inc] x 6`
+has to yield 12 cells and 18 stitches, which is the same 18 the engine computes. Where a row
+cannot be fully charted (distributive wording such as "sc in each st across"), the chart reports
+"partly placed" rather than claiming agreement or disagreement.
+
 ## Running it
 
 Standalone development (client and its own API on one port):
+
+Requires **Node 20.19 or newer** (Vite 8). The package declares this in `engines`.
 
 ```bash
 cd web/studio

@@ -1,4 +1,4 @@
-From 0ec6b9b617a66bcae57fe29c9fb8446231a450de Mon Sep 17 00:00:00 2001
+From 1578e3ce4cf2447b2e2b3ba3cc5832935d5fd8a5 Mon Sep 17 00:00:00 2001
 From: Arena Agent <agent@arena.ai>
 Date: Sun, 25 Oct 2026 06:00:04 +0000
 Subject: [PATCH] feat(studio): add optional web companion under web/studio
@@ -31,22 +31,26 @@ Verification
  src/crochet_checker/web/app.py                |   37 +
  src/crochet_checker/web/import_url.py         |  275 ++
  tests/test_import_url.py                      |  256 ++
- web/studio/README.md                          |  136 +
- web/studio/index.html                         |   15 +
+ web/studio/README.md                          |  147 +
+ web/studio/index.html                         |   18 +
  web/studio/package-lock.json                  | 2435 +++++++++++++++++
  web/studio/package.json                       |   34 +
  web/studio/public/favicon.svg                 |   11 +
- web/studio/src/client/App.tsx                 |   87 +
+ web/studio/public/manifest.webmanifest        |   18 +
+ web/studio/public/sw.js                       |   83 +
+ web/studio/src/client/App.tsx                 |  106 +
+ .../src/client/components/CommandPalette.tsx  |  139 +
  .../src/client/components/PatternBits.tsx     |  166 ++
  .../src/client/components/StitchSymbol.tsx    |  169 ++
  web/studio/src/client/components/ui.tsx       |   97 +
  web/studio/src/client/lib/ai.ts               |  196 ++
+ web/studio/src/client/lib/images.ts           |   69 +
  web/studio/src/client/lib/pdf.ts              |   74 +
  web/studio/src/client/lib/pyEngine.ts         |   78 +
  web/studio/src/client/lib/router.ts           |   25 +
  web/studio/src/client/lib/speech.ts           |  110 +
- web/studio/src/client/lib/storage.ts          |   70 +
- web/studio/src/client/main.tsx                |   19 +
+ web/studio/src/client/lib/storage.ts          |   76 +
+ web/studio/src/client/main.tsx                |   33 +
  web/studio/src/client/pages/Canvas.tsx        |  398 +++
  web/studio/src/client/pages/Checker.tsx       |  351 +++
  web/studio/src/client/pages/Converter.tsx     |  303 ++
@@ -54,38 +58,47 @@ Verification
  web/studio/src/client/pages/Gauge.tsx         |  377 +++
  web/studio/src/client/pages/Home.tsx          |  199 ++
  web/studio/src/client/pages/ImageChart.tsx    |  414 +++
+ web/studio/src/client/pages/Journal.tsx       |  306 +++
  web/studio/src/client/pages/Library.tsx       |  162 ++
  web/studio/src/client/pages/PatternView.tsx   |  227 ++
  web/studio/src/client/pages/Projects.tsx      |  483 ++++
  web/studio/src/client/pages/Settings.tsx      |  253 ++
+ web/studio/src/client/pages/Stash.tsx         |  443 +++
  web/studio/src/client/pages/StitchId.tsx      |  302 ++
+ web/studio/src/client/pages/Symbols.tsx       |  238 ++
  web/studio/src/client/pages/Terminology.tsx   |  228 ++
- web/studio/src/client/store.tsx               |  221 ++
- web/studio/src/client/styles.css              |  485 ++++
+ web/studio/src/client/store.tsx               |  264 ++
+ web/studio/src/client/styles.css              |  675 +++++
  web/studio/src/domain/catalog.ts              |  430 +++
  web/studio/src/domain/checkerSummary.ts       |   63 +
  web/studio/src/domain/courses.ts              |  349 +++
  web/studio/src/domain/gauge.ts                |  209 ++
  web/studio/src/domain/imageChart.ts           |  290 ++
+ web/studio/src/domain/journal.ts              |  210 ++
  web/studio/src/domain/patternChecker.ts       |  473 ++++
  web/studio/src/domain/patternGenerator.ts     |  469 ++++
  web/studio/src/domain/patternParser.ts        |  475 ++++
+ web/studio/src/domain/search.ts               |  209 ++
  web/studio/src/domain/stitchAnalyzer.ts       |  350 +++
+ web/studio/src/domain/stitchTokens.ts         |  307 +++
  web/studio/src/domain/stitches.ts             |  284 ++
+ web/studio/src/domain/symbols.ts              |  214 ++
  web/studio/src/domain/terminology.ts          |  174 ++
+ web/studio/src/domain/yarn.ts                 |  363 +++
  web/studio/src/server/app.ts                  |   62 +
  web/studio/src/server/dev.ts                  |   68 +
  web/studio/src/server/index.ts                |   13 +
  web/studio/src/server/urlImport.ts            |  236 ++
- web/studio/src/shared/types.ts                |  329 +++
+ web/studio/src/shared/types.ts                |  385 +++
  web/studio/src/tests/analysis.test.ts         |   99 +
  web/studio/src/tests/features.test.ts         |  299 ++
+ web/studio/src/tests/features2.test.ts        |  493 ++++
  web/studio/src/tests/fixtures.ts              |   74 +
  web/studio/src/tests/generator.test.ts        |  135 +
  web/studio/src/tests/patternChecker.test.ts   |   97 +
  web/studio/tsconfig.json                      |   25 +
  web/studio/vite.config.ts                     |   25 +
- 59 files changed, 13900 insertions(+)
+ 72 files changed, 17334 insertions(+)
  create mode 100644 src/crochet_checker/web/import_url.py
  create mode 100644 tests/test_import_url.py
  create mode 100644 web/studio/README.md
@@ -93,11 +106,15 @@ Verification
  create mode 100644 web/studio/package-lock.json
  create mode 100644 web/studio/package.json
  create mode 100644 web/studio/public/favicon.svg
+ create mode 100644 web/studio/public/manifest.webmanifest
+ create mode 100644 web/studio/public/sw.js
  create mode 100644 web/studio/src/client/App.tsx
+ create mode 100644 web/studio/src/client/components/CommandPalette.tsx
  create mode 100644 web/studio/src/client/components/PatternBits.tsx
  create mode 100644 web/studio/src/client/components/StitchSymbol.tsx
  create mode 100644 web/studio/src/client/components/ui.tsx
  create mode 100644 web/studio/src/client/lib/ai.ts
+ create mode 100644 web/studio/src/client/lib/images.ts
  create mode 100644 web/studio/src/client/lib/pdf.ts
  create mode 100644 web/studio/src/client/lib/pyEngine.ts
  create mode 100644 web/studio/src/client/lib/router.ts
@@ -111,11 +128,14 @@ Verification
  create mode 100644 web/studio/src/client/pages/Gauge.tsx
  create mode 100644 web/studio/src/client/pages/Home.tsx
  create mode 100644 web/studio/src/client/pages/ImageChart.tsx
+ create mode 100644 web/studio/src/client/pages/Journal.tsx
  create mode 100644 web/studio/src/client/pages/Library.tsx
  create mode 100644 web/studio/src/client/pages/PatternView.tsx
  create mode 100644 web/studio/src/client/pages/Projects.tsx
  create mode 100644 web/studio/src/client/pages/Settings.tsx
+ create mode 100644 web/studio/src/client/pages/Stash.tsx
  create mode 100644 web/studio/src/client/pages/StitchId.tsx
+ create mode 100644 web/studio/src/client/pages/Symbols.tsx
  create mode 100644 web/studio/src/client/pages/Terminology.tsx
  create mode 100644 web/studio/src/client/store.tsx
  create mode 100644 web/studio/src/client/styles.css
@@ -124,12 +144,17 @@ Verification
  create mode 100644 web/studio/src/domain/courses.ts
  create mode 100644 web/studio/src/domain/gauge.ts
  create mode 100644 web/studio/src/domain/imageChart.ts
+ create mode 100644 web/studio/src/domain/journal.ts
  create mode 100644 web/studio/src/domain/patternChecker.ts
  create mode 100644 web/studio/src/domain/patternGenerator.ts
  create mode 100644 web/studio/src/domain/patternParser.ts
+ create mode 100644 web/studio/src/domain/search.ts
  create mode 100644 web/studio/src/domain/stitchAnalyzer.ts
+ create mode 100644 web/studio/src/domain/stitchTokens.ts
  create mode 100644 web/studio/src/domain/stitches.ts
+ create mode 100644 web/studio/src/domain/symbols.ts
  create mode 100644 web/studio/src/domain/terminology.ts
+ create mode 100644 web/studio/src/domain/yarn.ts
  create mode 100644 web/studio/src/server/app.ts
  create mode 100644 web/studio/src/server/dev.ts
  create mode 100644 web/studio/src/server/index.ts
@@ -137,6 +162,7 @@ Verification
  create mode 100644 web/studio/src/shared/types.ts
  create mode 100644 web/studio/src/tests/analysis.test.ts
  create mode 100644 web/studio/src/tests/features.test.ts
+ create mode 100644 web/studio/src/tests/features2.test.ts
  create mode 100644 web/studio/src/tests/fixtures.ts
  create mode 100644 web/studio/src/tests/generator.test.ts
  create mode 100644 web/studio/src/tests/patternChecker.test.ts
@@ -809,10 +835,10 @@ index 0000000..ecef1cc
 +    assert caught.value.status == 415
 diff --git a/web/studio/README.md b/web/studio/README.md
 new file mode 100644
-index 0000000..86399d1
+index 0000000..a39f05f
 --- /dev/null
 +++ b/web/studio/README.md
-@@ -0,0 +1,136 @@
+@@ -0,0 +1,147 @@
 +# YarnCraft Studio
 +
 +An original crochet and knitting companion: pattern library, stitch-maths checker, PDF and web
@@ -854,6 +880,11 @@ index 0000000..86399d1
 +| **Image to chart** | Upload an image, get a reduced palette, a stitch grid and written colourwork rows whose numbers always sum to the chart width. |
 +| **Read aloud** | Hands-free row reading with the browser's speech engine, one row at a time, with adjustable speed. |
 +| **Print sheet** | A print stylesheet strips navigation and controls so any pattern prints as a clean working copy. |
++| **Yarn stash & planner** | Price a pattern from your own gauge, see how many skeins that means, and get told when the waste allowance is what pushes you over a skein boundary. Stash tracks length, weight and value. |
++| **Symbol charts** | Written rows become standard chart symbols, one cell per stitch, with repeat boundaries marked. Cells are weighted by how many stitches they make, so an increase is one cell worth two. |
++| **Journal** | Notes, measurements and progress photos per project, grouped by day. Photos are downscaled and evicted oldest-first before the storage quota is reached — and the page says when that happens. |
++| **Command palette** | Ctrl/⌘+K over every tool, all 526 patterns and every lesson. Word order doesn't matter and keyword-only matches never outrank a name. |
++| **Offline** | A service worker caches the app shell, so the studio opens with no signal. API calls are never cached: the Python checker is the authority and a stale verdict would be worse than none. |
 +| **Optional AI** | Pluggable: offline (default), OpenAI, Anthropic, or an OpenAI-compatible gateway. Keys stay in the browser and are sent only to the provider you choose. |
 +| **Backup** | Full state export/import as JSON. Everything is local-first; there is no account and no server database. |
 +
@@ -903,8 +934,14 @@ index 0000000..86399d1
 +
 +Dependency audit: **0 vulnerabilities** (Vite 8, Vitest 5, React 18).
 +
-+Studio tests: **60 passing**, covering the checker, generators, texture analysis, web import,
-+dialect translation (round-trip and count-preservation), gauge maths, and image charting.
++Studio tests: **117 passing**, covering the checker, generators, texture analysis, web import,
++dialect translation (round-trip and count-preservation), gauge maths, image charting, stitch
++tokenizing, yarn estimation, skein planning, symbol charts, journal budgets and palette ranking.
++
++The stitch tokenizer is tested *against* the maths engine, not just on its own: `[sc, inc] x 6`
++has to yield 12 cells and 18 stitches, which is the same 18 the engine computes. Where a row
++cannot be fully charted (distributive wording such as "sc in each st across"), the chart reports
++"partly placed" rather than claiming agreement or disagreement.
 +
 +## Running it
 +
@@ -951,10 +988,10 @@ index 0000000..86399d1
 +- **Data lives in one browser.** There is no sync and no account. Use the backup export to move it.
 diff --git a/web/studio/index.html b/web/studio/index.html
 new file mode 100644
-index 0000000..7f48411
+index 0000000..e4ae484
 --- /dev/null
 +++ b/web/studio/index.html
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,18 @@
 +<!doctype html>
 +<html lang="en">
 +  <head>
@@ -962,6 +999,9 @@ index 0000000..7f48411
 +    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 +    <meta name="theme-color" content="#FBF6EC" />
 +    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
++    <link rel="manifest" href="/manifest.webmanifest" />
++    <meta name="apple-mobile-web-app-capable" content="yes" />
++    <meta name="apple-mobile-web-app-title" content="Studio" />
 +    <meta name="description" content="YarnCraft Studio - learn crochet and knitting, browse patterns, track rows, check pattern math, convert PDFs, identify stitches from a photo, and design your own patterns." />
 +    <title>Crochet Studio</title>
 +  </head>
@@ -3468,12 +3508,125 @@ index 0000000..743152c
 +    <path d="M49 28c-6 3-11 8-13 14"/>
 +  </g>
 +</svg>
+diff --git a/web/studio/public/manifest.webmanifest b/web/studio/public/manifest.webmanifest
+new file mode 100644
+index 0000000..b138eba
+--- /dev/null
++++ b/web/studio/public/manifest.webmanifest
+@@ -0,0 +1,18 @@
++{
++  "name": "Crochet Studio",
++  "short_name": "Studio",
++  "description": "Pattern library, stitch-maths checker, yarn planner and symbol charts. Works offline.",
++  "start_url": "./",
++  "scope": "./",
++  "display": "standalone",
++  "background_color": "#fbf6ec",
++  "theme_color": "#c2643c",
++  "icons": [
++    {
++      "src": "favicon.svg",
++      "sizes": "any",
++      "type": "image/svg+xml",
++      "purpose": "any"
++    }
++  ]
++}
+diff --git a/web/studio/public/sw.js b/web/studio/public/sw.js
+new file mode 100644
+index 0000000..a26ba8d
+--- /dev/null
++++ b/web/studio/public/sw.js
+@@ -0,0 +1,83 @@
++/*
++ * Offline shell.
++ *
++ * Two strategies, chosen by what the request is:
++ *
++ *  - app shell (HTML, JS, CSS, the worker itself): cache first, so the studio
++ *    opens instantly and works with no signal. Vite fingerprints asset names,
++ *    so a stale cache cannot serve a stale bundle -- a new build asks for a
++ *    filename that was never cached and the network answers.
++ *  - API calls: network only. The Python checker is the authority; replaying a
++ *    cached verdict would tell you a pattern is fine based on an older parse.
++ *    Offline, the app sees a clean failure and says so.
++ *
++ * Registered from main.tsx. Bump VERSION to invalidate every shell entry.
++ */
++const VERSION = 'v1';
++const SHELL = `studio-shell-${VERSION}`;
++
++/** Fetched at install so the app opens offline after a single visit. */
++const CORE = ['./', './manifest.webmanifest', './favicon.svg'];
++
++self.addEventListener('install', (event) => {
++  event.waitUntil(
++    caches
++      .open(SHELL)
++      .then((cache) => cache.addAll(CORE))
++      .catch(() => undefined)
++      .then(() => self.skipWaiting()),
++  );
++});
++
++self.addEventListener('activate', (event) => {
++  event.waitUntil(
++    caches
++      .keys()
++      .then((keys) => Promise.all(keys.filter((key) => key !== SHELL).map((key) => caches.delete(key))))
++      .then(() => self.clients.claim()),
++  );
++});
++
++function isApi(url) {
++  return url.pathname.includes('/api/');
++}
++
++self.addEventListener('fetch', (event) => {
++  const request = event.request;
++  if (request.method !== 'GET') return;
++
++  const url = new URL(request.url);
++  if (url.origin !== self.location.origin) return;
++  if (isApi(url)) return;
++
++  event.respondWith(
++    caches.match(request).then((cached) => {
++      if (cached) {
++        // Refresh in the background; the cached copy already answered.
++        event.waitUntil(
++          fetch(request)
++            .then((response) => {
++              if (response.ok) return caches.open(SHELL).then((cache) => cache.put(request, response.clone()));
++              return undefined;
++            })
++            .catch(() => undefined),
++        );
++        return cached;
++      }
++
++      return fetch(request)
++        .then((response) => {
++          if (response.ok) {
++            const copy = response.clone();
++            caches.open(SHELL).then((cache) => cache.put(request, copy)).catch(() => undefined);
++          }
++          return response;
++        })
++        .catch(() =>
++          request.mode === 'navigate'
++            ? caches.match('./').then((shell) => shell ?? Response.error())
++            : Response.error(),
++        );
++    }),
++  );
++});
 diff --git a/web/studio/src/client/App.tsx b/web/studio/src/client/App.tsx
 new file mode 100644
-index 0000000..7b0db21
+index 0000000..f5f5a91
 --- /dev/null
 +++ b/web/studio/src/client/App.tsx
-@@ -0,0 +1,87 @@
+@@ -0,0 +1,106 @@
 +import { useRoute } from './lib/router.ts';
 +import { HomePage } from './pages/Home.tsx';
 +import { LibraryPage } from './pages/Library.tsx';
@@ -3488,6 +3641,10 @@ index 0000000..7b0db21
 +import { TerminologyPage } from './pages/Terminology.tsx';
 +import { GaugePage } from './pages/Gauge.tsx';
 +import { ImageChartPage } from './pages/ImageChart.tsx';
++import { StashPage } from './pages/Stash.tsx';
++import { SymbolsPage } from './pages/Symbols.tsx';
++import { JournalPage } from './pages/Journal.tsx';
++import { CommandPalette } from './components/CommandPalette.tsx';
 +
 +const NAV = [
 +  { href: '/library', label: 'Patterns' },
@@ -3497,6 +3654,9 @@ index 0000000..7b0db21
 +  { href: '/stitch-id', label: 'Stitch ID' },
 +  { href: '/canvas', label: 'Canvas' },
 +  { href: '/chart', label: 'Chart' },
++  { href: '/symbols', label: 'Symbols' },
++  { href: '/stash', label: 'Stash' },
++  { href: '/journal', label: 'Journal' },
 +  { href: '/gauge', label: 'Gauge' },
 +  { href: '/terminology', label: 'US/UK' },
 +  { href: '/courses', label: 'Learn' },
@@ -3515,6 +3675,9 @@ index 0000000..7b0db21
 +  else if (root === 'stitch-id') page = <StitchIdPage />;
 +  else if (root === 'canvas') page = <CanvasPage />;
 +  else if (root === 'chart') page = <ImageChartPage />;
++  else if (root === 'symbols') page = <SymbolsPage />;
++  else if (root === 'stash') page = <StashPage />;
++  else if (root === 'journal') page = <JournalPage />;
 +  else if (root === 'gauge') page = <GaugePage />;
 +  else if (root === 'terminology') page = <TerminologyPage />;
 +  else if (root === 'courses') page = <CoursesPage />;
@@ -3542,6 +3705,14 @@ index 0000000..7b0db21
 +                {item.label}
 +              </a>
 +            ))}
++            <button
++              className="btn ghost sm nav-search"
++              onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}
++              aria-label="Search everything (Ctrl or Command K)"
++              title="Search everything (Ctrl / Cmd + K)"
++            >
++              Search <kbd>⌘K</kbd>
++            </button>
 +            <a href="#/settings" className={path.startsWith('/settings') ? 'active' : ''} aria-label="Settings">
 +              ⚙
 +            </a>
@@ -3558,6 +3729,152 @@ index 0000000..7b0db21
 +          YarnCraft Studio · an original crochet and knitting companion · all data stays on this device
 +        </p>
 +      </footer>
++      <CommandPalette />
++    </div>
++  );
++}
+diff --git a/web/studio/src/client/components/CommandPalette.tsx b/web/studio/src/client/components/CommandPalette.tsx
+new file mode 100644
+index 0000000..2b21b9f
+--- /dev/null
++++ b/web/studio/src/client/components/CommandPalette.tsx
+@@ -0,0 +1,139 @@
++import { useEffect, useMemo, useRef, useState } from 'react';
++import { buildIndex, search, type SearchHit } from '../../domain/search.ts';
++import { buildCatalog } from '../../domain/catalog.ts';
++import { COURSES } from '../../domain/courses.ts';
++import { navigate } from '../lib/router.ts';
++
++/**
++ * Ctrl/Cmd+K. Built once per open, not per keystroke: the catalog is 526 entries
++ * and rebuilding it inside the input handler makes the palette feel laggy.
++ */
++export function CommandPalette() {
++  const [open, setOpen] = useState(false);
++  const [query, setQuery] = useState('');
++  const [active, setActive] = useState(0);
++  const inputRef = useRef<HTMLInputElement | null>(null);
++  const listRef = useRef<HTMLDivElement | null>(null);
++
++  const docs = useMemo(
++    () => buildIndex({ patterns: buildCatalog(), courses: COURSES }),
++    [],
++  );
++
++  const hits = useMemo(() => search(query, docs, 14), [query, docs]);
++
++  useEffect(() => {
++    const onKey = (event: KeyboardEvent) => {
++      const target = event.target as HTMLElement | null;
++      const typing =
++        target instanceof HTMLInputElement ||
++        target instanceof HTMLTextAreaElement ||
++        target?.isContentEditable === true;
++
++      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
++        event.preventDefault();
++        setOpen((current) => !current);
++        return;
++      }
++      if (event.key === 'Escape' && open) {
++        event.preventDefault();
++        setOpen(false);
++        return;
++      }
++      // A bare "/" jumps here too, but only when not already typing somewhere.
++      if (event.key === '/' && !typing && !open) {
++        event.preventDefault();
++        setOpen(true);
++      }
++    };
++    window.addEventListener('keydown', onKey);
++    return () => window.removeEventListener('keydown', onKey);
++  }, [open]);
++
++  useEffect(() => {
++    if (!open) return;
++    setQuery('');
++    setActive(0);
++    const timer = window.setTimeout(() => inputRef.current?.focus(), 20);
++    return () => window.clearTimeout(timer);
++  }, [open]);
++
++  useEffect(() => {
++    setActive(0);
++  }, [query]);
++
++  const choose = (hit: SearchHit | undefined) => {
++    if (!hit) return;
++    setOpen(false);
++    navigate(hit.doc.href);
++  };
++
++  if (!open) return null;
++
++  const onKeyDown = (event: React.KeyboardEvent) => {
++    if (event.key === 'ArrowDown') {
++      event.preventDefault();
++      setActive((current) => Math.min(current + 1, hits.length - 1));
++    } else if (event.key === 'ArrowUp') {
++      event.preventDefault();
++      setActive((current) => Math.max(current - 1, 0));
++    } else if (event.key === 'Enter') {
++      event.preventDefault();
++      choose(hits[active]);
++    } else if (event.key === 'Tab') {
++      // Keep focus inside the dialog; the list is the only control.
++      event.preventDefault();
++    }
++  };
++
++  return (
++    <div className="modal-backdrop" onMouseDown={() => setOpen(false)}>
++      <div
++        className="modal palette"
++        role="dialog"
++        aria-modal="true"
++        aria-label="Search everything"
++        onMouseDown={(event) => event.stopPropagation()}
++        onKeyDown={onKeyDown}
++      >
++        <input
++          ref={inputRef}
++          className="palette-input"
++          value={query}
++          onChange={(event) => setQuery(event.target.value)}
++          placeholder="Search tools, 526 patterns and lessons…"
++          aria-label="Search"
++          aria-controls="palette-results"
++          aria-activedescendant={hits[active] ? `palette-hit-${active}` : undefined}
++        />
++        <div className="palette-results" ref={listRef} id="palette-results" role="listbox">
++          {hits.length === 0 ? (
++            <p className="empty">Nothing matched. Try a shorter word.</p>
++          ) : (
++            hits.map((hit, index) => (
++              <button
++                key={hit.doc.id}
++                id={`palette-hit-${index}`}
++                role="option"
++                aria-selected={index === active}
++                className={`palette-row ${index === active ? 'active' : ''}`}
++                onMouseEnter={() => setActive(index)}
++                onClick={() => choose(hit)}
++              >
++                <span className="palette-group">{hit.doc.group}</span>
++                <span className="palette-title">{hit.doc.title}</span>
++                {hit.doc.subtitle ? <span className="palette-sub">{hit.doc.subtitle}</span> : null}
++              </button>
++            ))
++          )}
++        </div>
++        <footer className="palette-foot tiny faint">
++          <span>
++            <b>↑↓</b> move · <b>Enter</b> open · <b>Esc</b> close
++          </span>
++          <span>Ctrl / ⌘ + K anywhere</span>
++        </footer>
++      </div>
 +    </div>
 +  );
 +}
@@ -4214,6 +4531,81 @@ index 0000000..96bc8db
 +  if (settings.provider === 'offline') return false;
 +  return settings.apiKey.trim().length > 0;
 +}
+diff --git a/web/studio/src/client/lib/images.ts b/web/studio/src/client/lib/images.ts
+new file mode 100644
+index 0000000..aed45df
+--- /dev/null
++++ b/web/studio/src/client/lib/images.ts
+@@ -0,0 +1,69 @@
++/**
++ * Browser-side image intake.
++ *
++ * Reads a file, downscales it to a sane long edge, and returns a data URL plus
++ * the final dimensions. The *policy* (target size, budget) lives in
++ * `domain/journal.ts`; this file only performs the work the browser has to do.
++ */
++
++import { fitWithin, PHOTO_MAX_EDGE, PHOTO_BUDGET_BYTES, dataUrlBytes } from '../../domain/journal.ts';
++
++export interface LoadedImage {
++  dataUrl: string;
++  width: number;
++  height: number;
++  bytes: number;
++}
++
++const QUALITY_STEPS = [0.82, 0.7, 0.58, 0.45];
++
++/**
++ * Decode, downscale and re-encode. Quality steps down until the result fits the
++ * per-photo budget, so a photo-heavy journal does not silently exceed the
++ * storage quota on the first save.
++ */
++export async function loadImageFile(file: File, maxEdge = PHOTO_MAX_EDGE): Promise<LoadedImage> {
++  if (!file.type.startsWith('image/')) {
++    throw new Error('That file is not an image.');
++  }
++
++  const bitmap = await createImageBitmap(file);
++  const target = fitWithin(bitmap.width, bitmap.height, maxEdge);
++  if (target.width === 0 || target.height === 0) {
++    bitmap.close();
++    throw new Error('That image has no usable dimensions.');
++  }
++
++  const canvas = document.createElement('canvas');
++  canvas.width = target.width;
++  canvas.height = target.height;
++  const context = canvas.getContext('2d');
++  if (!context) {
++    bitmap.close();
++    throw new Error('This browser would not give us a drawing surface.');
++  }
++
++  context.imageSmoothingQuality = 'high';
++  context.drawImage(bitmap, 0, 0, target.width, target.height);
++  bitmap.close();
++
++  let dataUrl = canvas.toDataURL('image/jpeg', QUALITY_STEPS[0]);
++  for (const quality of QUALITY_STEPS.slice(1)) {
++    if (dataUrlBytes(dataUrl) <= PHOTO_BUDGET_BYTES) break;
++    dataUrl = canvas.toDataURL('image/jpeg', quality);
++  }
++
++  return {
++    dataUrl,
++    width: target.width,
++    height: target.height,
++    bytes: dataUrlBytes(dataUrl),
++  };
++}
++
++/** Format a byte count for display. */
++export function formatBytes(bytes: number): string {
++  if (bytes < 1024) return `${Math.round(bytes)} B`;
++  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
++  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
++}
 diff --git a/web/studio/src/client/lib/pdf.ts b/web/studio/src/client/lib/pdf.ts
 new file mode 100644
 index 0000000..ebc8211
@@ -4527,10 +4919,10 @@ index 0000000..0b7b8fa
 +}
 diff --git a/web/studio/src/client/lib/storage.ts b/web/studio/src/client/lib/storage.ts
 new file mode 100644
-index 0000000..fe65290
+index 0000000..3a5f3f2
 --- /dev/null
 +++ b/web/studio/src/client/lib/storage.ts
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,76 @@
 +import type { AppState, Settings } from '../../shared/types.ts';
 +
 +export const STORAGE_KEY = 'yarncraft.state.v1';
@@ -4554,6 +4946,9 @@ index 0000000..fe65290
 +    canvases: [],
 +    stitchAnalyses: [],
 +    activity: {},
++    stash: [],
++    yarnPlans: [],
++    journal: [],
 +  };
 +}
 +
@@ -4576,6 +4971,9 @@ index 0000000..fe65290
 +      recentPatterns: parsed.recentPatterns ?? [],
 +      courseProgress: parsed.courseProgress ?? {},
 +      activity: parsed.activity ?? {},
++      stash: parsed.stash ?? [],
++      yarnPlans: parsed.yarnPlans ?? [],
++      journal: parsed.journal ?? [],
 +    };
 +  } catch {
 +    return defaultState();
@@ -4603,10 +5001,10 @@ index 0000000..fe65290
 +}
 diff --git a/web/studio/src/client/main.tsx b/web/studio/src/client/main.tsx
 new file mode 100644
-index 0000000..61054ac
+index 0000000..a7b9edc
 --- /dev/null
 +++ b/web/studio/src/client/main.tsx
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,33 @@
 +import { StrictMode } from 'react';
 +import { createRoot } from 'react-dom/client';
 +import { App } from './App.tsx';
@@ -4616,6 +5014,20 @@ index 0000000..61054ac
 +
 +const container = document.getElementById('root');
 +if (!container) throw new Error('Root element missing');
++
++/*
++ * Register the offline shell. Only in a production build: a service worker in
++ * front of the Vite dev server would serve cached modules and make edits look
++ * like they did nothing.
++ */
++if (import.meta.env.PROD && 'serviceWorker' in navigator) {
++  window.addEventListener('load', () => {
++    const base = import.meta.env.BASE_URL || '/';
++    navigator.serviceWorker.register(`${base}sw.js`, { scope: base }).catch(() => {
++      // Offline support is a bonus; the app still works without it.
++    });
++  });
++}
 +
 +createRoot(container).render(
 +  <StrictMode>
@@ -6856,6 +7268,318 @@ index 0000000..4b4c57f
 +    </div>
 +  );
 +}
+diff --git a/web/studio/src/client/pages/Journal.tsx b/web/studio/src/client/pages/Journal.tsx
+new file mode 100644
+index 0000000..740cab0
+--- /dev/null
++++ b/web/studio/src/client/pages/Journal.tsx
+@@ -0,0 +1,306 @@
++import { useMemo, useRef, useState } from 'react';
++import type { JournalRecord } from '../../shared/types.ts';
++import {
++  dataUrlBytes,
++  groupByDay,
++  journalBytes,
++  measurementLabels,
++  measurementTrend,
++  PROJECT_PHOTO_BUDGET,
++  sortEntries,
++  trimToBudget,
++} from '../../domain/journal.ts';
++import { formatBytes, loadImageFile } from '../lib/images.ts';
++import { useStore } from '../store.tsx';
++import { useToast } from '../components/ui.tsx';
++import { navigate } from '../lib/router.ts';
++
++type ComposerKind = 'note' | 'photo' | 'measure' | 'milestone';
++
++export function JournalPage() {
++  const { state, addJournalEntry, deleteJournalEntry } = useStore();
++  const toast = useToast();
++  const fileInput = useRef<HTMLInputElement | null>(null);
++
++  const [projectId, setProjectId] = useState(state.projects[0]?.id ?? '');
++  const [kind, setKind] = useState<ComposerKind>('note');
++  const [text, setText] = useState('');
++  const [label, setLabel] = useState('Length');
++  const [pending, setPending] = useState<{ dataUrl: string; width: number; height: number } | null>(null);
++  const [busy, setBusy] = useState(false);
++
++  const entries = useMemo<JournalRecord[]>(
++    () => (projectId ? state.journal.filter((entry) => entry.projectId === projectId) : []),
++    [state.journal, projectId],
++  );
++
++  const groups = useMemo(() => groupByDay(entries), [entries]);
++  const bytes = useMemo(() => journalBytes(entries), [entries]);
++  const labels = useMemo(() => measurementLabels(entries), [entries]);
++  const trends = useMemo(
++    () => labels.map((name) => ({ name, trend: measurementTrend(entries, name) })).filter((row) => row.trend),
++    [labels, entries],
++  );
++
++  const overflow = bytes > PROJECT_PHOTO_BUDGET;
++
++  const pickPhoto = async (file: File | undefined) => {
++    if (!file) return;
++    setBusy(true);
++    try {
++      const loaded = await loadImageFile(file);
++      setPending({ dataUrl: loaded.dataUrl, width: loaded.width, height: loaded.height });
++      toast.show(`Photo ready: ${loaded.width}x${loaded.height}, ${formatBytes(loaded.bytes)}.`);
++    } catch (error) {
++      toast.show(error instanceof Error ? error.message : 'That photo could not be read.');
++    } finally {
++      setBusy(false);
++    }
++  };
++
++  const save = () => {
++    if (!projectId) {
++      toast.show('Start a project first, then journal against it.');
++      return;
++    }
++    if (kind !== 'photo' && !text.trim()) {
++      toast.show('Write something first.');
++      return;
++    }
++    if (kind === 'photo' && !pending) {
++      toast.show('Choose a photo first.');
++      return;
++    }
++    if (kind === 'measure' && !Number.isFinite(Number.parseFloat(text))) {
++      toast.show('A measurement has to be a number, in cm.');
++      return;
++    }
++
++    const next: Omit<JournalRecord, 'id'> = {
++      projectId,
++      at: new Date().toISOString(),
++      kind,
++      text:
++        kind === 'photo'
++          ? text.trim() || 'Progress photo'
++          : kind === 'measure'
++            ? String(Number.parseFloat(text))
++            : text.trim(),
++      label: kind === 'measure' ? label.trim() || 'Measure' : undefined,
++      image: kind === 'photo' ? pending?.dataUrl : undefined,
++      width: kind === 'photo' ? pending?.width : undefined,
++      height: kind === 'photo' ? pending?.height : undefined,
++    };
++
++    /*
++     * Work out what has to go *before* saving, so the quota is never hit. The
++     * evictions are then really deleted: computing them and only reporting them
++     * would leave the app over budget while claiming otherwise.
++     */
++    const candidate = [...entries, { ...next, id: 'pending' } as JournalRecord];
++    const trimmed = trimToBudget(candidate);
++    const droppedIds = trimmed.dropped.map((dropped) => dropped.id).filter((id) => id !== 'pending');
++    for (const id of droppedIds) deleteJournalEntry(id);
++
++    addJournalEntry(next);
++    setText('');
++    setPending(null);
++    if (fileInput.current) fileInput.current.value = '';
++
++    toast.show(
++      droppedIds.length > 0
++        ? `Saved. ${droppedIds.length} older photo${droppedIds.length === 1 ? '' : 's'} removed to stay inside the storage budget.`
++        : 'Saved.',
++    );
++  };
++
++  return (
++    <div>
++      <div className="page-head">
++        <div className="eyebrow">Journal</div>
++        <h1>What the project actually looked like</h1>
++        <p className="lead">
++          Notes, measurements and progress photos, filed against a project and grouped by day. Photos
++          are downscaled before they are stored, and the oldest are dropped before the browser's quota
++          is reached — the page tells you when that happens rather than losing an entry silently.
++        </p>
++      </div>
++
++      {state.projects.length === 0 ? (
++        <div className="empty">
++          No projects yet. <button className="btn ghost sm" onClick={() => navigate('/projects')}>Start one</button>{' '}
++          and the journal will have somewhere to file things.
++        </div>
++      ) : (
++        <>
++          <section className="card">
++            <div className="section-head">
++              <h2 className="card-title">New entry</h2>
++              <select value={projectId} onChange={(event) => setProjectId(event.target.value)}>
++                {state.projects.map((project) => (
++                  <option key={project.id} value={project.id}>
++                    {project.title}
++                  </option>
++                ))}
++              </select>
++            </div>
++
++            <div className="segmented" role="tablist" aria-label="Entry kind">
++              {(['note', 'photo', 'measure', 'milestone'] as ComposerKind[]).map((option) => (
++                <button
++                  key={option}
++                  role="tab"
++                  aria-selected={kind === option}
++                  className={kind === option ? 'active' : ''}
++                  onClick={() => setKind(option)}
++                >
++                  {option === 'measure' ? 'Measurement' : option[0]!.toUpperCase() + option.slice(1)}
++                </button>
++              ))}
++            </div>
++
++            {kind === 'measure' ? (
++              <div className="grid grid-2">
++                <label className="field">
++                  <span>What are you measuring?</span>
++                  <input value={label} onChange={(event) => setLabel(event.target.value)} placeholder="Sleeve length" />
++                </label>
++                <label className="field">
++                  <span>Value in cm</span>
++                  <input
++                    type="number"
++                    step="0.5"
++                    value={text}
++                    onChange={(event) => setText(event.target.value)}
++                    placeholder="38"
++                  />
++                </label>
++              </div>
++            ) : (
++              <label className="field">
++                <span>{kind === 'photo' ? 'Caption (optional)' : kind === 'milestone' ? 'Milestone' : 'Note'}</span>
++                <textarea
++                  rows={3}
++                  value={text}
++                  onChange={(event) => setText(event.target.value)}
++                  placeholder={
++                    kind === 'milestone'
++                      ? 'Finished the body, starting the sleeves'
++                      : kind === 'photo'
++                        ? 'Colour looks right in daylight'
++                        : 'The tension loosened after row 12'
++                  }
++                />
++              </label>
++            )}
++
++            {kind === 'photo' ? (
++              <div className="dropzone">
++                <input
++                  ref={fileInput}
++                  type="file"
++                  accept="image/*"
++                  onChange={(event) => void pickPhoto(event.target.files?.[0])}
++                />
++                {busy ? <p className="small">Shrinking the photo…</p> : null}
++                {pending ? (
++                  <div className="photo-frame">
++                    <img src={pending.dataUrl} alt="Pending progress photo" />
++                    <p className="tiny faint">
++                      {pending.width}x{pending.height} ·{' '}
++                      {formatBytes(dataUrlBytes(pending.dataUrl))} once stored
++                    </p>
++                  </div>
++                ) : null}
++              </div>
++            ) : null}
++
++            <button className="btn" onClick={save} disabled={busy}>
++              Save entry
++            </button>
++          </section>
++
++          <section className="card">
++            <div className="section-head">
++              <h2 className="card-title">Timeline</h2>
++              <div className="row-tight">
++                <span className="chip">{entries.length} entries</span>
++                <span className={overflow ? 'chip warn' : 'chip'}>
++                  {formatBytes(bytes)} of photos
++                </span>
++              </div>
++            </div>
++
++            {overflow ? (
++              <div className="callout warn">
++                This project is over its photo budget. The next photo will evict the oldest ones.
++              </div>
++            ) : null}
++
++            {trends.length ? (
++              <div className="grid grid-3">
++                {trends.map(({ name, trend }) => (
++                  <div className="stat" key={name}>
++                    <b>
++                      {trend!.last} cm
++                    </b>
++                    <span>
++                      {name} · {trend!.delta >= 0 ? '+' : ''}
++                      {trend!.delta} cm over {trend!.count} measurements
++                    </span>
++                  </div>
++                ))}
++              </div>
++            ) : null}
++
++            {groups.length === 0 ? (
++              <div className="empty">Nothing filed yet.</div>
++            ) : (
++              groups.map((group) => (
++                <div key={group.day} className="journal-group">
++                  <h3 className="journal-day">{group.label}</h3>
++                  {sortEntries(group.entries).map((entry) => (
++                    <article key={entry.id} className={`journal-entry kind-${entry.kind}`}>
++                      <div className="journal-meta">
++                        <span className="chip">{entry.kind === 'measure' ? 'measurement' : entry.kind}</span>
++                        <span className="tiny faint">
++                          {new Date(entry.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
++                        </span>
++                      </div>
++                      {entry.kind === 'measure' ? (
++                        <p>
++                          <b>{entry.label}</b>: {entry.text} cm
++                        </p>
++                      ) : (
++                        <p>{entry.text}</p>
++                      )}
++                      {entry.image ? (
++                        <img
++                          className="journal-photo"
++                          src={entry.image}
++                          alt={entry.text || 'Progress photo'}
++                          width={entry.width}
++                          height={entry.height}
++                          loading="lazy"
++                        />
++                      ) : null}
++                      <button
++                        className="btn ghost sm"
++                        onClick={() => {
++                          deleteJournalEntry(entry.id);
++                          toast.show('Entry deleted.');
++                        }}
++                      >
++                        Delete
++                      </button>
++                    </article>
++                  ))}
++                </div>
++              ))
++            )}
++          </section>
++        </>
++      )}
++    </div>
++  );
++}
 diff --git a/web/studio/src/client/pages/Library.tsx b/web/studio/src/client/pages/Library.tsx
 new file mode 100644
 index 0000000..b862734
@@ -8005,6 +8729,455 @@ index 0000000..f0cf25e
 +    </div>
 +  );
 +}
+diff --git a/web/studio/src/client/pages/Stash.tsx b/web/studio/src/client/pages/Stash.tsx
+new file mode 100644
+index 0000000..bbe2fc8
+--- /dev/null
++++ b/web/studio/src/client/pages/Stash.tsx
+@@ -0,0 +1,443 @@
++import { useMemo, useState } from 'react';
++import {
++  formatLength,
++  planSkeins,
++  toMetres,
++  type GaugeInput,
++  type YarnEstimate,
++} from '../../domain/yarn.ts';
++import { estimateYarn } from '../../domain/yarn.ts';
++import { parsePattern } from '../../domain/patternParser.ts';
++import { YARN_WEIGHTS } from '../../domain/gauge.ts';
++import { useStore } from '../store.tsx';
++import { useToast } from '../components/ui.tsx';
++import { navigate } from '../lib/router.ts';
++
++export function StashPage() {
++  const { state, addStashYarn, updateStashYarn, deleteStashYarn, saveYarnPlan } = useStore();
++  const toast = useToast();
++
++  const [patternText, setPatternText] = useState(
++    'Row 1: ch 21, sc in 2nd ch from hook and each ch across (20)\nRow 2: ch 1, turn, sc in each st across (20)',
++  );
++  const [stitchesPer10cm, setStitchesPer10cm] = useState(16);
++  const [skeinInput, setSkeinInput] = useState({ metres: 200, unit: 'm' as 'm' | 'yd', price: 6, waste: 10 });
++
++  const [draft, setDraft] = useState({
++    name: '',
++    brand: '',
++    weight: 'worsted',
++    skeinMetres: 200,
++    unit: 'm' as 'm' | 'yd',
++    skeins: 3,
++    colour: '',
++    pricePerSkein: 6,
++  });
++
++  const parsed = useMemo(() => (patternText.trim() ? parsePattern(patternText) : null), [patternText]);
++
++  const gauge: GaugeInput = { stitchesPer10cm };
++  const estimate = useMemo<YarnEstimate | null>(() => {
++    if (!parsed) return null;
++    const result = estimateYarn(parsed, gauge);
++    return result.ok ? result : null;
++  }, [parsed, stitchesPer10cm]);
++
++  const problem = useMemo(() => {
++    if (!parsed) return null;
++    const result = estimateYarn(parsed, gauge);
++    return result.ok ? null : result.problem;
++  }, [parsed, stitchesPer10cm]);
++
++  const skeinMetres = toMetres(skeinInput.metres, skeinInput.unit === 'yd' ? 'yd' : 'm');
++  const plan = useMemo(() => {
++    if (!estimate) return null;
++    const result = planSkeins({
++      neededMetres: estimate.totalMetres,
++      skeinMetres,
++      waste: skeinInput.waste / 100,
++      pricePerSkein: skeinInput.price,
++    });
++    return result.ok ? result : null;
++  }, [estimate, skeinMetres, skeinInput.waste, skeinInput.price]);
++
++  const stashMetres = useMemo(
++    () => state.stash.reduce((sum, yarn) => sum + yarn.skeinMetres * yarn.skeins, 0),
++    [state.stash],
++  );
++
++  const totalValue = useMemo(
++    () => state.stash.reduce((sum, yarn) => sum + (yarn.pricePerSkein ?? 0) * yarn.skeins, 0),
++    [state.stash],
++  );
++
++  const addYarn = () => {
++    if (!draft.name.trim()) {
++      toast.show('Give the yarn a name so you can find it later.');
++      return;
++    }
++    addStashYarn({
++      name: draft.name.trim(),
++      brand: draft.brand.trim() || undefined,
++      weight: draft.weight,
++      skeinMetres: toMetres(draft.skeinMetres, draft.unit === 'yd' ? 'yd' : 'm'),
++      skeins: draft.skeins,
++      colour: draft.colour.trim() || undefined,
++      pricePerSkein: draft.pricePerSkein || undefined,
++    });
++    setDraft((current) => ({ ...current, name: '', brand: '', colour: '' }));
++    toast.show('Added to your stash.');
++  };
++
++  return (
++    <div>
++      <div className="page-head">
++        <div className="eyebrow">Yarn stash &amp; planner</div>
++        <h1>Will this take more yarn than I have?</h1>
++        <p className="lead">
++          Price a pattern from your own gauge, then see how many skeins that means. The estimate is a
++          model of stitch geometry, so it is labelled as an estimate everywhere — a measured swatch is
++          the authoritative number, and this says so rather than pretending otherwise.
++        </p>
++      </div>
++
++      <div className="grid grid-2">
++        <section className="card">
++          <h2 className="card-title">1. Your gauge</h2>
++          <p className="muted small">
++            Measure a blocked swatch. Yarn per stitch scales with stitch width, so without a gauge the
++            estimate is meaningless — this refuses to guess one.
++          </p>
++          <label className="field">
++            <span>Stitches per 10 cm</span>
++            <input
++              type="number"
++              min={1}
++              max={200}
++              value={stitchesPer10cm}
++              onChange={(event) => setStitchesPer10cm(Number(event.target.value))}
++            />
++          </label>
++          {problem ? <div className="callout warn">{problem}</div> : null}
++        </section>
++
++        <section className="card">
++          <h2 className="card-title">2. Your yarn</h2>
++          <label className="field">
++            <span>Skein length</span>
++            <div className="row">
++              <input
++                type="number"
++                min={1}
++                value={skeinInput.metres}
++                onChange={(event) => setSkeinInput({ ...skeinInput, metres: Number(event.target.value) })}
++              />
++              <select
++                value={skeinInput.unit}
++                onChange={(event) => setSkeinInput({ ...skeinInput, unit: event.target.value as 'm' | 'yd' })}
++              >
++                <option value="m">metres</option>
++                <option value="yd">yards</option>
++              </select>
++            </div>
++          </label>
++          <div className="grid grid-2">
++            <label className="field">
++              <span>Price per skein</span>
++              <input
++                type="number"
++                min={0}
++                step="0.5"
++                value={skeinInput.price}
++                onChange={(event) => setSkeinInput({ ...skeinInput, price: Number(event.target.value) })}
++              />
++            </label>
++            <label className="field">
++              <span>Allowance %</span>
++              <input
++                type="number"
++                min={0}
++                max={100}
++                value={skeinInput.waste}
++                onChange={(event) => setSkeinInput({ ...skeinInput, waste: Number(event.target.value) })}
++              />
++            </label>
++          </div>
++          <p className="tiny faint">
++            {formatLength(skeinMetres)} per skein. The allowance covers a swatch and joins; it is
++            reported separately so you can see when it changes the number of skeins you buy.
++          </p>
++        </section>
++      </div>
++
++      <section className="card">
++        <h2 className="card-title">3. Your pattern</h2>
++        <label className="field">
++          <span>Paste the rows</span>
++          <textarea
++            rows={8}
++            className="mono"
++            value={patternText}
++            onChange={(event) => setPatternText(event.target.value)}
++            placeholder="Row 1: ch 21, sc in 2nd ch from hook and each ch across (20)"
++          />
++        </label>
++
++        {estimate ? (
++          <>
++            <div className="grid grid-3" style={{ marginTop: 16 }}>
++              <div className="stat">
++                <b>{formatLength(estimate.totalMetres)}</b>
++                <span>estimated yarn</span>
++              </div>
++              <div className="stat">
++                <b>{Math.round(estimate.totalYards)} yd</b>
++                <span>in yards</span>
++              </div>
++              <div className="stat">
++                <b>{plan ? plan.skeins : '—'}</b>
++                <span>skeins to buy</span>
++              </div>
++            </div>
++
++            {plan ? (
++              <div className={plan.wasteChangedCount ? 'callout warn' : 'callout'}>
++                {plan.wasteChangedCount ? (
++                  <>
++                    <b>Buy {plan.skeins}, not {plan.skeins - 1}.</b> The {Math.round(plan.wasteFraction * 100)}%
++                    allowance is what pushes this over a skein boundary. Without it you would come up{' '}
++                    {formatLength(plan.withWasteMetres - plan.neededMetres)} short.
++                  </>
++                ) : (
++                  <>
++                    <b>{plan.skeins} skein{plan.skeins === 1 ? '' : 's'}</b> ={' '}
++                    {formatLength(plan.purchasedMetres)}, leaving{' '}
++                    {formatLength(plan.leftoverMetres)} ({Math.round(plan.leftoverFraction * 100)}%) spare.
++                  </>
++                )}
++                {plan.cost !== undefined ? <> About {plan.cost.toFixed(2)} total.</> : null}
++              </div>
++            ) : null}
++
++            {estimate.fallbackCodes.length ? (
++              <p className="tiny faint">
++                Priced with a fallback for: {estimate.fallbackCodes.join(', ')}. Treat the total as a
++                floor, not a precise figure.
++              </p>
++            ) : null}
++            {estimate.incomplete ? (
++              <p className="tiny faint">
++                Some steps could not be read, so this total excludes them. Run the pattern through the
++                checker first.
++              </p>
++            ) : null}
++
++            <div className="row" style={{ marginTop: 12 }}>
++              <button
++                className="btn"
++                onClick={() => {
++                  saveYarnPlan({
++                    name: `Estimate ${new Date().toLocaleDateString()}`,
++                    neededMetres: estimate.totalMetres,
++                    skeinMetres,
++                    skeins: plan?.skeins ?? 0,
++                  });
++                  toast.show('Plan saved.');
++                }}
++              >
++                Save this plan
++              </button>
++              <button className="btn ghost" onClick={() => navigate('/checker')}>
++                Check the counts first
++              </button>
++            </div>
++
++            <details style={{ marginTop: 16 }}>
++              <summary>Per-row breakdown</summary>
++              <table className="table">
++                <thead>
++                  <tr>
++                    <th>Step</th>
++                    <th>Stitches</th>
++                    <th>Yarn</th>
++                  </tr>
++                </thead>
++                <tbody>
++                  {estimate.steps.map((step) => (
++                    <tr key={step.index}>
++                      <td>{step.label}</td>
++                      <td className="mono">{step.stitches}</td>
++                      <td className="mono">{formatLength(step.cm / 100)}</td>
++                    </tr>
++                  ))}
++                </tbody>
++              </table>
++            </details>
++          </>
++        ) : (
++          <div className="empty">Paste a few rows to see an estimate.</div>
++        )}
++      </section>
++
++      <section className="card">
++        <div className="section-head">
++          <h2 className="card-title">Your stash</h2>
++          <div className="row-tight">
++            <span className="chip">{state.stash.length} yarns</span>
++            <span className="chip">{formatLength(stashMetres)}</span>
++            <span className="chip">{totalValue.toFixed(0)} value</span>
++          </div>
++        </div>
++
++        <div className="grid grid-4">
++          <label className="field">
++            <span>Name</span>
++            <input value={draft.name} onChange={(event) => setDraft({ ...draft, name: event.target.value })} placeholder="Soft Merino" />
++          </label>
++          <label className="field">
++            <span>Brand</span>
++            <input value={draft.brand} onChange={(event) => setDraft({ ...draft, brand: event.target.value })} />
++          </label>
++          <label className="field">
++            <span>Weight</span>
++            <select value={draft.weight} onChange={(event) => setDraft({ ...draft, weight: event.target.value })}>
++              {YARN_WEIGHTS.map((weight) => (
++                <option key={weight.key} value={weight.key}>
++                  {weight.name}
++                </option>
++              ))}
++            </select>
++          </label>
++          <label className="field">
++            <span>Colour</span>
++            <input value={draft.colour} onChange={(event) => setDraft({ ...draft, colour: event.target.value })} />
++          </label>
++          <label className="field">
++            <span>Skein length</span>
++            <input
++              type="number"
++              min={1}
++              value={draft.skeinMetres}
++              onChange={(event) => setDraft({ ...draft, skeinMetres: Number(event.target.value) })}
++            />
++          </label>
++          <label className="field">
++            <span>Unit</span>
++            <select value={draft.unit} onChange={(event) => setDraft({ ...draft, unit: event.target.value as 'm' | 'yd' })}>
++              <option value="m">metres</option>
++              <option value="yd">yards</option>
++            </select>
++          </label>
++          <label className="field">
++            <span>Skeins</span>
++            <input
++              type="number"
++              min={0}
++              value={draft.skeins}
++              onChange={(event) => setDraft({ ...draft, skeins: Number(event.target.value) })}
++            />
++          </label>
++          <label className="field">
++            <span>Price each</span>
++            <input
++              type="number"
++              min={0}
++              step="0.5"
++              value={draft.pricePerSkein}
++              onChange={(event) => setDraft({ ...draft, pricePerSkein: Number(event.target.value) })}
++            />
++          </label>
++        </div>
++        <button className="btn" onClick={addYarn}>
++          Add to stash
++        </button>
++
++        {estimate && stashMetres >= estimate.totalMetres && state.stash.length > 0 ? (
++          <div className="callout" style={{ marginTop: 12 }}>
++            Your stash already holds {formatLength(stashMetres)}, which covers the estimated{' '}
++            {formatLength(estimate.totalMetres)}. Check the weight matches before you start.
++          </div>
++        ) : null}
++
++        {state.stash.length === 0 ? (
++          <div className="empty">Nothing in the stash yet. Add what you have and this page will tell you when a pattern is already covered.</div>
++        ) : (
++          <table className="table">
++            <thead>
++              <tr>
++                <th>Yarn</th>
++                <th>Weight</th>
++                <th>Skeins</th>
++                <th>Length</th>
++                <th />
++              </tr>
++            </thead>
++            <tbody>
++              {state.stash.map((yarn) => (
++                <tr key={yarn.id}>
++                  <td>
++                    {yarn.name}
++                    {yarn.brand ? <span className="faint"> · {yarn.brand}</span> : null}
++                    {yarn.colour ? <span className="chip" style={{ marginLeft: 8 }}>{yarn.colour}</span> : null}
++                  </td>
++                  <td>{YARN_WEIGHTS.find((weight) => weight.key === yarn.weight)?.name ?? yarn.weight}</td>
++                  <td>
++                    <input
++                      type="number"
++                      min={0}
++                      style={{ width: 70 }}
++                      value={yarn.skeins}
++                      onChange={(event) => updateStashYarn(yarn.id, { skeins: Number(event.target.value) })}
++                    />
++                  </td>
++                  <td className="mono">{formatLength(yarn.skeinMetres * yarn.skeins)}</td>
++                  <td>
++                    <button className="btn ghost sm" onClick={() => deleteStashYarn(yarn.id)}>
++                      Remove
++                    </button>
++                  </td>
++                </tr>
++              ))}
++            </tbody>
++          </table>
++        )}
++      </section>
++
++      {state.yarnPlans.length ? (
++        <section className="card">
++          <h2 className="card-title">Saved plans</h2>
++          <table className="table">
++            <thead>
++              <tr>
++                <th>Plan</th>
++                <th>Needed</th>
++                <th>Skeins</th>
++                <th />
++              </tr>
++            </thead>
++            <tbody>
++              {state.yarnPlans.map((saved) => (
++                <tr key={saved.id}>
++                  <td>{saved.name}</td>
++                  <td className="mono">{formatLength(saved.neededMetres)}</td>
++                  <td className="mono">{saved.skeins}</td>
++                  <td>
++                    <button
++                      className="btn ghost sm"
++                      onClick={() => {
++                        setSkeinInput((current) => ({ ...current, metres: saved.skeinMetres }));
++                        toast.show('Loaded into the planner.');
++                      }}
++                    >
++                      Reuse
++                    </button>
++                  </td>
++                </tr>
++              ))}
++            </tbody>
++          </table>
++        </section>
++      ) : null}
++    </div>
++  );
++}
 diff --git a/web/studio/src/client/pages/StitchId.tsx b/web/studio/src/client/pages/StitchId.tsx
 new file mode 100644
 index 0000000..9001b06
@@ -8313,6 +9486,250 @@ index 0000000..9001b06
 +    </div>
 +  );
 +}
+diff --git a/web/studio/src/client/pages/Symbols.tsx b/web/studio/src/client/pages/Symbols.tsx
+new file mode 100644
+index 0000000..6349290
+--- /dev/null
++++ b/web/studio/src/client/pages/Symbols.tsx
+@@ -0,0 +1,238 @@
++import { useMemo, useState } from 'react';
++import { parsePattern } from '../../domain/patternParser.ts';
++import {
++  buildChart,
++  CELL,
++  chartAgreesWith,
++  chartMade,
++  repeatBoundaries,
++  symbolFor,
++  symbolLegend,
++  type ChartRow,
++} from '../../domain/symbols.ts';
++import { navigate } from '../lib/router.ts';
++
++const SAMPLE = [
++  'Round 1: 6 sc in magic ring (6)',
++  'Round 2: inc in each st around (12)',
++  'Round 3: [sc, inc] x 6 (18)',
++  'Round 4: [2 sc, inc] x 6 (24)',
++  'Round 5: sc in each st around (24)',
++].join('\n');
++
++/** One cell, drawn from the shape table in the domain. */
++function Cell({ code, quiet }: { code: string; quiet?: boolean }) {
++  const shape = symbolFor(code);
++  return (
++    <svg width={CELL} height={CELL} viewBox={`0 0 ${CELL} ${CELL}`} aria-hidden="true">
++      <g
++        fill="none"
++        stroke="currentColor"
++        strokeWidth={2}
++        strokeLinecap="round"
++        strokeLinejoin="round"
++        opacity={quiet ? 0.45 : 1}
++      >
++        {shape.paths.map((path, index) => (
++          <path key={index} d={path} />
++        ))}
++      </g>
++      {shape.fills?.map((path, index) => (
++        <path key={`f${index}`} d={path} fill="currentColor" opacity={quiet ? 0.3 : 0.85} />
++      ))}
++      {shape.dots?.map((dot, index) => (
++        <circle key={`d${index}`} cx={dot.cx} cy={dot.cy} r={dot.r} fill="currentColor" opacity={quiet ? 0.4 : 1} />
++      ))}
++    </svg>
++  );
++}
++
++function RowStrip({ row, width, expectedCount }: { row: ChartRow; width: number; expectedCount?: number }) {
++  const boundaries = repeatBoundaries(row);
++  // Compare against the documented count when the writer gave one, otherwise the
++  // computed count the engine derived. Both live on the parsed step.
++  const agrees = chartAgreesWith(row, expectedCount);
++
++  return (
++    <div className="chart-row">
++      <div className="chart-row-label">
++        <b>{row.label}</b>
++        <span className="faint tiny">
++          {row.cells.length} cells · {chartMade(row)} sts
++        </span>
++      </div>
++      <svg
++        className="symbol-row"
++        width={width * CELL + 8}
++        height={CELL + 8}
++        viewBox={`0 0 ${width * CELL + 8} ${CELL + 8}`}
++        role="img"
++        aria-label={`${row.label}: ${row.cells.map((cell) => symbolFor(cell.token.code).label).join(', ')}`}
++      >
++        {boundaries.map((column) => (
++          <line
++            key={column}
++            x1={column * CELL + 4}
++            y1={2}
++            x2={column * CELL + 4}
++            y2={CELL + 6}
++            stroke="currentColor"
++            strokeWidth={0.5}
++            opacity={0.18}
++            strokeDasharray="2 3"
++          />
++        ))}
++        {row.cells.map((cell) => (
++          <g key={cell.column} transform={`translate(${cell.column * CELL + 4}, 4)`}>
++            <Cell code={cell.token.code} quiet={symbolFor(cell.token.code).quiet} />
++          </g>
++        ))}
++      </svg>
++      <div className="chart-row-note">
++        {agrees === null ? (
++          row.unparsed.length ? (
++            <span className="chip">partly placed</span>
++          ) : null
++        ) : agrees ? (
++          <span className="chip ok">matches the count</span>
++        ) : (
++          <span className="chip warn">chart and count disagree</span>
++        )}
++        {row.unparsed.length ? <span className="tiny faint"> not placed: {row.unparsed.join(', ')}</span> : null}
++      </div>
++    </div>
++  );
++}
++
++export function SymbolsPage() {
++  const [text, setText] = useState(SAMPLE);
++  const [showQuiet, setShowQuiet] = useState(true);
++
++  const parsed = useMemo(() => (text.trim() ? parsePattern(text) : null), [text]);
++  const chart = useMemo(() => (parsed ? buildChart(parsed) : null), [parsed]);
++
++  // Turning chains and joins occupy a position but are not counted stitches;
++  // hiding them is a reading preference, so the cells are filtered and the
++  // columns renumbered rather than leaving gaps.
++  const rows = useMemo(() => {
++    const source = chart?.rows ?? [];
++    if (showQuiet) return source;
++    return source.map((row) => ({
++      ...row,
++      cells: row.cells
++        .filter((cell) => !symbolFor(cell.token.code).quiet)
++        .map((cell, column) => ({ ...cell, column })),
++    }));
++  }, [chart, showQuiet]);
++
++  const chartWidth = useMemo(
++    () => rows.reduce((widest, row) => Math.max(widest, row.cells.length), 0),
++    [rows],
++  );
++
++  return (
++    <div>
++      <div className="page-head">
++        <div className="eyebrow">Symbol charts</div>
++        <h1>See the row, not just the words</h1>
++        <p className="lead">
++          Paste written rows and get the standard chart symbols, one cell per stitch, with repeat
++          boundaries marked. This is a drawing of the maths the checker already did — if the number of
++          cells and the computed count ever disagree, the page says so instead of drawing a pretty lie.
++        </p>
++      </div>
++
++      <div className="grid grid-2">
++        <section className="card">
++          <h2 className="card-title">Written rows</h2>
++          <label className="field">
++            <span>One row or round per line</span>
++            <textarea
++              rows={14}
++              className="mono"
++              value={text}
++              onChange={(event) => setText(event.target.value)}
++              placeholder="Round 1: 6 sc in magic ring (6)"
++            />
++          </label>
++          <div className="row">
++            <label className="row-tight">
++              <input type="checkbox" checked={showQuiet} onChange={(event) => setShowQuiet(event.target.checked)} />
++              <span className="small">Show turning chains and joins</span>
++            </label>
++            <button className="btn ghost sm" onClick={() => setText(SAMPLE)}>
++              Reset sample
++            </button>
++            <button className="btn ghost sm" onClick={() => navigate('/checker')}>
++              Check counts
++            </button>
++          </div>
++        </section>
++
++        <section className="card">
++          <h2 className="card-title">Legend</h2>
++          <div className="chart-legend">
++            {symbolLegend().map((entry) => (
++              <div key={entry.code} className="legend-item">
++                <Cell code={entry.code} quiet={entry.quiet} />
++                <span>{entry.label}</span>
++              </div>
++            ))}
++          </div>
++          <p className="tiny faint">
++            Symbols follow the international chart convention: × for single crochet, T with one slash
++            per extra height, a dot for slip stitch. A decrease is drawn as two strokes converging so
++            you can see which stitches merged.
++          </p>
++        </section>
++      </div>
++
++      {chart && rows.length ? (
++        <section className="card">
++          <div className="section-head">
++            <h2 className="card-title">Chart</h2>
++            <div className="row-tight">
++              <span className="chip">{rows.length} rows</span>
++              <span className="chip">{chartWidth} cells wide</span>
++              {chart.truncated ? <span className="chip warn">truncated</span> : null}
++            </div>
++          </div>
++
++          <div className="symbol-chart">
++            {rows.map((row) => (
++              <RowStrip
++                key={row.index}
++                row={row}
++                width={chartWidth}
++                expectedCount={
++                  parsed?.steps.find((step) => step.index === row.index)?.declaredCount ??
++                  parsed?.steps.find((step) => step.index === row.index)?.computedCount
++                }
++              />
++            ))}
++          </div>
++
++          {chart.skipped.length ? (
++            <p className="tiny faint">
++              Not charted (no stitches to place): {chart.skipped.join(', ')}.
++            </p>
++          ) : null}
++          {chart.truncated ? (
++            <div className="callout warn">
++              A row expanded past the cell limit, so this chart is incomplete. That usually means a
++              multiplier in the text is not what you meant — check the row.
++            </div>
++          ) : null}
++
++          <div className="row" style={{ marginTop: 16 }}>
++            <button className="btn ghost" onClick={() => window.print()}>
++              Print the chart
++            </button>
++          </div>
++        </section>
++      ) : (
++        <div className="empty">Paste rows on the left to see them charted.</div>
++      )}
++    </div>
++  );
++}
 diff --git a/web/studio/src/client/pages/Terminology.tsx b/web/studio/src/client/pages/Terminology.tsx
 new file mode 100644
 index 0000000..0cca0de
@@ -8549,10 +9966,10 @@ index 0000000..0cca0de
 +}
 diff --git a/web/studio/src/client/store.tsx b/web/studio/src/client/store.tsx
 new file mode 100644
-index 0000000..4a778e4
+index 0000000..0ff7329
 --- /dev/null
 +++ b/web/studio/src/client/store.tsx
-@@ -0,0 +1,221 @@
+@@ -0,0 +1,264 @@
 +import {
 +  createContext,
 +  useCallback,
@@ -8569,8 +9986,11 @@ index 0000000..4a778e4
 +  CustomPatternRecord,
 +  ParsedPattern,
 +  Project,
++  JournalRecord,
 +  SavedStitchAnalysis,
 +  Settings,
++  StashYarn,
++  YarnPlan,
 +} from '../shared/types.ts';
 +import { defaultState, loadState, saveState, todayKey } from './lib/storage.ts';
 +
@@ -8598,6 +10018,13 @@ index 0000000..4a778e4
 +  deleteCanvas: (id: string) => void;
 +  saveStitchAnalysis: (analysis: SavedStitchAnalysis) => void;
 +  deleteStitchAnalysis: (id: string) => void;
++  addStashYarn: (yarn: Omit<StashYarn, 'id' | 'addedAt'>) => StashYarn;
++  updateStashYarn: (id: string, patch: Partial<StashYarn>) => void;
++  deleteStashYarn: (id: string) => void;
++  saveYarnPlan: (plan: Omit<YarnPlan, 'id' | 'createdAt'>) => void;
++  deleteYarnPlan: (id: string) => void;
++  addJournalEntry: (entry: Omit<JournalRecord, 'id'>) => void;
++  deleteJournalEntry: (id: string) => void;
 +  exportData: () => string;
 +  importData: (json: string) => { ok: boolean; message: string };
 +  resetAll: () => void;
@@ -8746,6 +10173,39 @@ index 0000000..4a778e4
 +      deleteStitchAnalysis: (id) =>
 +        setState((c) => ({ ...c, stitchAnalyses: c.stitchAnalyses.filter((a) => a.id !== id) })),
 +
++      addStashYarn: (yarn) => {
++        const record: StashYarn = { ...yarn, id: uid(), addedAt: Date.now() };
++        setState((c) => ({ ...c, stash: [record, ...c.stash] }));
++        return record;
++      },
++
++      updateStashYarn: (id, patch) =>
++        setState((c) => ({
++          ...c,
++          stash: c.stash.map((yarn) => (yarn.id === id ? { ...yarn, ...patch } : yarn)),
++        })),
++
++      deleteStashYarn: (id) =>
++        setState((c) => ({ ...c, stash: c.stash.filter((yarn) => yarn.id !== id) })),
++
++      saveYarnPlan: (plan) =>
++        setState((c) => ({
++          ...c,
++          yarnPlans: [{ ...plan, id: uid(), createdAt: Date.now() }, ...c.yarnPlans].slice(0, 40),
++        })),
++
++      deleteYarnPlan: (id) =>
++        setState((c) => ({ ...c, yarnPlans: c.yarnPlans.filter((plan) => plan.id !== id) })),
++
++      addJournalEntry: (entry) =>
++        setState((c) => ({
++          ...c,
++          journal: [{ ...entry, id: uid() }, ...c.journal].slice(0, 2000),
++        })),
++
++      deleteJournalEntry: (id) =>
++        setState((c) => ({ ...c, journal: c.journal.filter((entry) => entry.id !== id) })),
++
 +      exportData: () => JSON.stringify(state, null, 2),
 +
 +      importData: (json) => {
@@ -8776,10 +10236,10 @@ index 0000000..4a778e4
 +export { uid };
 diff --git a/web/studio/src/client/styles.css b/web/studio/src/client/styles.css
 new file mode 100644
-index 0000000..6cc13c8
+index 0000000..2abf1cf
 --- /dev/null
 +++ b/web/studio/src/client/styles.css
-@@ -0,0 +1,485 @@
+@@ -0,0 +1,675 @@
 +/* YarnCraft Studio - design tokens and layout */
 +
 +:root {
@@ -9265,6 +10725,196 @@ index 0000000..6cc13c8
 +}
 +.speak-bar .label { font-size: 0.8rem; color: #26526a; font-weight: 600; }
 +.speak-bar input[type='range'] { width: 110px; accent-color: var(--sky); }
++
++/* --------------------------------------------------------- command palette */
++.nav-search {
++  gap: 6px;
++  white-space: nowrap;
++}
++.nav-search kbd {
++  font-family: var(--mono, ui-monospace, monospace);
++  font-size: 11px;
++  padding: 1px 5px;
++  border-radius: 4px;
++  border: 1px solid var(--line);
++  opacity: 0.65;
++}
++.palette {
++  width: min(640px, 94vw);
++  padding: 0;
++  overflow: hidden;
++  align-self: flex-start;
++  margin-top: 12vh;
++}
++.palette-input {
++  width: 100%;
++  border: 0;
++  border-bottom: 1px solid var(--line);
++  border-radius: 0;
++  padding: 16px 18px;
++  font-size: 17px;
++  background: transparent;
++  color: inherit;
++}
++.palette-input:focus {
++  outline: 2px solid var(--accent, #c2643c);
++  outline-offset: -2px;
++}
++.palette-results {
++  max-height: 52vh;
++  overflow-y: auto;
++  padding: 6px;
++}
++.palette-row {
++  display: grid;
++  grid-template-columns: 74px 1fr;
++  grid-template-rows: auto auto;
++  gap: 0 10px;
++  width: 100%;
++  text-align: left;
++  padding: 9px 12px;
++  border: 0;
++  border-radius: 8px;
++  background: transparent;
++  color: inherit;
++  cursor: pointer;
++}
++.palette-row.active {
++  background: color-mix(in srgb, var(--accent, #c2643c) 14%, transparent);
++}
++.palette-group {
++  grid-row: span 2;
++  align-self: center;
++  font-size: 10px;
++  letter-spacing: 0.08em;
++  text-transform: uppercase;
++  opacity: 0.55;
++}
++.palette-title {
++  font-weight: 600;
++}
++.palette-sub {
++  font-size: 12px;
++  opacity: 0.7;
++}
++.palette-foot {
++  display: flex;
++  justify-content: space-between;
++  gap: 10px;
++  padding: 8px 14px;
++  border-top: 1px solid var(--line);
++}
++
++/* ----------------------------------------------------------- symbol charts */
++.symbol-chart {
++  overflow-x: auto;
++  padding: 8px 0;
++  display: flex;
++  flex-direction: column;
++  gap: 6px;
++}
++.chart-row {
++  display: grid;
++  grid-template-columns: 104px auto 1fr;
++  align-items: center;
++  gap: 12px;
++  padding-bottom: 6px;
++  border-bottom: 1px dashed color-mix(in srgb, currentColor 12%, transparent);
++}
++.chart-row-label {
++  display: flex;
++  flex-direction: column;
++}
++.symbol-row {
++  color: var(--ink, #2c2622);
++  flex: none;
++}
++.chart-row-note {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  flex-wrap: wrap;
++}
++.chip.ok {
++  background: color-mix(in srgb, #2f7a4f 16%, transparent);
++}
++.chip.warn {
++  background: color-mix(in srgb, #b4531f 18%, transparent);
++}
++.legend-item {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++  font-size: 13px;
++}
++.chart-legend {
++  display: grid;
++  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
++  gap: 6px 14px;
++}
++
++/* ----------------------------------------------------------------- journal */
++.journal-group {
++  margin-top: 18px;
++}
++.journal-day {
++  font-size: 12px;
++  text-transform: uppercase;
++  letter-spacing: 0.09em;
++  opacity: 0.6;
++  margin: 0 0 8px;
++}
++.journal-entry {
++  border-left: 3px solid var(--line);
++  padding: 8px 0 8px 14px;
++  margin-bottom: 12px;
++}
++.journal-entry.kind-photo {
++  border-left-color: var(--accent, #c2643c);
++}
++.journal-entry.kind-measure {
++  border-left-color: #2f7a4f;
++}
++.journal-entry.kind-milestone {
++  border-left-color: #a8752b;
++}
++.journal-entry p {
++  margin: 6px 0;
++}
++.journal-meta {
++  display: flex;
++  align-items: center;
++  gap: 8px;
++}
++.journal-photo {
++  display: block;
++  max-width: min(100%, 420px);
++  height: auto;
++  border-radius: 10px;
++  margin: 8px 0;
++}
++.photo-frame img {
++  max-width: min(100%, 320px);
++  border-radius: 10px;
++  display: block;
++}
++.segmented button.active {
++  font-weight: 600;
++}
++
++/* Print: a symbol chart on paper is the point of a chart. */
++@media print {
++  .symbol-chart {
++    overflow: visible;
++  }
++  .chart-row {
++    break-inside: avoid;
++  }
++  .chart-row-note,
++  .nav-search {
++    display: none;
++  }
++}
 diff --git a/web/studio/src/domain/catalog.ts b/web/studio/src/domain/catalog.ts
 new file mode 100644
 index 0000000..f07517b
@@ -10635,6 +12285,222 @@ index 0000000..419db25
 +    height: options.height,
 +  });
 +  return { ...instructions, indices, palette };
++}
+diff --git a/web/studio/src/domain/journal.ts b/web/studio/src/domain/journal.ts
+new file mode 100644
+index 0000000..cc9e006
+--- /dev/null
++++ b/web/studio/src/domain/journal.ts
+@@ -0,0 +1,210 @@
++/**
++ * Project journal.
++ *
++ * Notes, measurements and progress photos, filed against a project. The pure
++ * part is ordering, grouping and budget: photos are the one thing in this app
++ * big enough to blow the browser's storage quota, so the rules for shrinking and
++ * evicting them are explicit and testable rather than buried in a React effect.
++ *
++ * Photo resizing itself needs a canvas, which lives in the browser. Everything
++ * *about* resizing - what size to aim for, which entry to drop first - is here.
++ */
++
++export type JournalKind = 'note' | 'photo' | 'measure' | 'milestone';
++
++export interface JournalEntry {
++  id: string;
++  projectId: string;
++  /** ISO timestamp. Stored as a string so it survives JSON round-trips. */
++  at: string;
++  kind: JournalKind;
++  text: string;
++  /** Data URL for a photo entry. Downscaled before storage. */
++  image?: string;
++  /** Photo dimensions after downscaling, for the grid to reserve space. */
++  width?: number;
++  height?: number;
++  /** For `measure` entries: the dimension being recorded. */
++  label?: string;
++}
++
++export const JOURNAL_LIMIT_PER_PROJECT = 400;
++
++/** Long edge, in pixels. 900 keeps a progress photo legible on a phone. */
++export const PHOTO_MAX_EDGE = 900;
++
++/** Rough per-photo budget, in bytes. A 900px JPEG lands well inside this. */
++export const PHOTO_BUDGET_BYTES = 260_000;
++
++/** Total photo budget for one project, in bytes. */
++export const PROJECT_PHOTO_BUDGET = 8_000_000;
++
++/**
++ * Target size for a downscale, preserving aspect ratio and never upscaling.
++ * Returns integer dimensions, because a canvas silently floors fractional sizes
++ * and a caller comparing them would see phantom drift.
++ */
++export function fitWithin(width: number, height: number, maxEdge = PHOTO_MAX_EDGE): { width: number; height: number } {
++  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
++    return { width: 0, height: 0 };
++  }
++  const longest = Math.max(width, height);
++  if (longest <= maxEdge) {
++    return { width: Math.round(width), height: Math.round(height) };
++  }
++  const scale = maxEdge / longest;
++  return {
++    width: Math.max(1, Math.round(width * scale)),
++    height: Math.max(1, Math.round(height * scale)),
++  };
++}
++
++/**
++ * Bytes a data URL occupies once stored. Base64 inflates by 4/3, and the
++ * `data:image/jpeg;base64,` header is counted too because localStorage stores
++ * the whole string.
++ */
++export function dataUrlBytes(dataUrl: string): number {
++  const comma = dataUrl.indexOf(',');
++  if (comma < 0) return dataUrl.length;
++  const payload = dataUrl.length - comma - 1;
++  const padding = dataUrl.endsWith('==') ? 2 : dataUrl.endsWith('=') ? 1 : 0;
++  return (payload * 3) / 4 - padding + comma + 1;
++}
++
++export function entriesForProject(entries: JournalEntry[], projectId: string): JournalEntry[] {
++  return entries.filter((entry) => entry.projectId === projectId);
++}
++
++/** Newest first, ties broken by id so ordering is stable across renders. */
++export function sortEntries(entries: JournalEntry[]): JournalEntry[] {
++  return [...entries].sort((a, b) => {
++    const diff = Date.parse(b.at) - Date.parse(a.at);
++    if (diff !== 0 && !Number.isNaN(diff)) return diff;
++    return a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
++  });
++}
++
++export interface JournalGroup {
++  /** `YYYY-MM-DD` in local time, used as a key. */
++  day: string;
++  label: string;
++  entries: JournalEntry[];
++}
++
++function localDay(date: Date): string {
++  const year = date.getFullYear();
++  const month = `${date.getMonth() + 1}`.padStart(2, '0');
++  const dayNumber = `${date.getDate()}`.padStart(2, '0');
++  return `${year}-${month}-${dayNumber}`;
++}
++
++/**
++ * Group by calendar day. Uses local time deliberately: a crafter photographing a
++ * sleeve at 11pm expects it under today, not tomorrow in UTC.
++ */
++export function groupByDay(entries: JournalEntry[], now = new Date()): JournalGroup[] {
++  const buckets = new Map<string, JournalEntry[]>();
++  for (const entry of sortEntries(entries)) {
++    const date = new Date(entry.at);
++    const key = Number.isNaN(date.getTime()) ? 'unknown' : localDay(date);
++    const list = buckets.get(key) ?? [];
++    list.push(entry);
++    buckets.set(key, list);
++  }
++
++  const today = localDay(now);
++  const yesterday = localDay(new Date(now.getTime() - 86_400_000));
++
++  return [...buckets.entries()]
++    .sort((a, b) => (a[0] < b[0] ? 1 : a[0] > b[0] ? -1 : 0))
++    .map(([day, grouped]) => ({
++      day,
++      label: day === today ? 'Today' : day === yesterday ? 'Yesterday' : day === 'unknown' ? 'Undated' : day,
++      entries: grouped,
++    }));
++}
++
++/** Newest first, so the order survives even if the caller re-sorts by day. */
++export function addEntry(entries: JournalEntry[], entry: JournalEntry): JournalEntry[] {
++  return sortEntries([...entries, entry]).slice(0, JOURNAL_LIMIT_PER_PROJECT);
++}
++
++export function removeEntry(entries: JournalEntry[], id: string): JournalEntry[] {
++  return entries.filter((entry) => entry.id !== id);
++}
++
++/**
++ * Evict oldest photos until the project fits its budget. Notes are never evicted:
++ * text is cheap and losing it would be a surprise, whereas photos are the entry
++ * kind the user implicitly knows are heavy.
++ *
++ * Returns what was kept and what was dropped, so the UI can say so rather than
++ * letting a photo vanish silently.
++ */
++export function trimToBudget(
++  entries: JournalEntry[],
++  budget = PROJECT_PHOTO_BUDGET,
++): { kept: JournalEntry[]; dropped: JournalEntry[] } {
++  const photos = entries.filter((entry) => entry.kind === 'photo' && entry.image);
++  const total = photos.reduce((sum, entry) => sum + (entry.image ? dataUrlBytes(entry.image) : 0), 0);
++  if (total <= budget) return { kept: entries, dropped: [] };
++
++  // Oldest first: drop the photo furthest from what the crafter is working on now.
++  const byAge = [...photos].sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
++  let over = total - budget;
++  const drop = new Set<string>();
++  for (const photo of byAge) {
++    if (over <= 0) break;
++    drop.add(photo.id);
++    over -= photo.image ? dataUrlBytes(photo.image) : 0;
++  }
++
++  return {
++    kept: entries.filter((entry) => !drop.has(entry.id)),
++    dropped: entries.filter((entry) => drop.has(entry.id)),
++  };
++}
++
++/** Total bytes the journal holds for one project. */
++export function journalBytes(entries: JournalEntry[]): number {
++  return entries.reduce((sum, entry) => sum + (entry.image ? dataUrlBytes(entry.image) : 0), 0);
++}
++
++/**
++ * Progress between the first and last measurement of the same label, so a sleeve
++ * can be tracked without the user mentally diffing two rows.
++ */
++export function measurementTrend(
++  entries: JournalEntry[],
++  label: string,
++): { first: number; last: number; delta: number; count: number } | null {
++  const points = entries
++    .filter((entry) => entry.kind === 'measure' && entry.label === label)
++    .sort((a, b) => Date.parse(a.at) - Date.parse(b.at))
++    .map((entry) => Number.parseFloat(entry.text))
++    .filter((value) => Number.isFinite(value));
++
++  if (points.length < 2) return null;
++  const first = points[0]!;
++  const last = points[points.length - 1]!;
++  return { first, last, delta: last - first, count: points.length };
++}
++
++/** Distinct measurement labels, in the order first used. */
++export function measurementLabels(entries: JournalEntry[]): string[] {
++  const seen = new Set<string>();
++  const labels: string[] = [];
++  for (const entry of sortEntries(entries).reverse()) {
++    if (entry.kind !== 'measure' || !entry.label) continue;
++    if (seen.has(entry.label)) continue;
++    seen.add(entry.label);
++    labels.push(entry.label);
++  }
++  return labels;
++}
++
++/** A stable id that does not need a crypto API, so tests are deterministic. */
++export function makeEntryId(seed: number, now = Date.now()): string {
++  return `j${now.toString(36)}-${Math.abs(Math.floor(seed)).toString(36)}`;
 +}
 diff --git a/web/studio/src/domain/patternChecker.ts b/web/studio/src/domain/patternChecker.ts
 new file mode 100644
@@ -12071,6 +13937,221 @@ index 0000000..9c8b0a7
 +export function countRows(steps: PatternStep[]): number {
 +  return steps.filter((s) => s.kind === 'row' || s.kind === 'round').length;
 +}
+diff --git a/web/studio/src/domain/search.ts b/web/studio/src/domain/search.ts
+new file mode 100644
+index 0000000..9e2624b
+--- /dev/null
++++ b/web/studio/src/domain/search.ts
+@@ -0,0 +1,209 @@
++/**
++ * Command palette search.
++ *
++ * Every destination in the app, plus every catalog pattern and course lesson,
++ * behind one keystroke. The ranking is a pure function so it can be tested:
++ * "amigurumi bunny" must find the bunny pattern even though the words are in a
++ * different order and separated by other text.
++ *
++ * Rules that matter for feel:
++ *  - a match at the start of a word beats a match inside a word
++ *  - consecutive matches beat scattered ones
++ *  - a title match beats a keyword match, so typing "gauge" reaches the gauge
++ *    tool before a pattern that happens to mention gauge
++ */
++
++import type { CatalogPattern } from '../shared/types.ts';
++
++export interface SearchDoc {
++  id: string;
++  title: string;
++  subtitle?: string;
++  /** Grouping label in the palette: Tools, Patterns, Learn. */
++  group: string;
++  href: string;
++  /** Extra searchable words that are not displayed. */
++  keywords?: string[];
++}
++
++export interface SearchHit {
++  doc: SearchDoc;
++  score: number;
++  /** Character positions in the title that matched, for highlighting. */
++  titlePositions: number[];
++}
++
++/** Case- and accent-insensitive fold. Accents matter: "Granny" vs "gränny". */
++export function fold(text: string): string {
++  return text
++    .normalize('NFD')
++    .replace(/[\u0300-\u036f]/g, '')
++    .toLowerCase();
++}
++
++/**
++ * Score one query against one string.
++ *
++ * Returns null when the query is not a subsequence of the target, otherwise a
++ * positive score. Subsequence rather than substring, so "scdc" finds "single
++ * crochet, double crochet" - but the bonuses are tuned so a plain substring
++ * still wins.
++ */
++export function scoreText(query: string, target: string): { score: number; positions: number[] } | null {
++  const q = fold(query).replace(/\s+/g, '');
++  const t = fold(target);
++  if (!q) return { score: 0, positions: [] };
++
++  // Fast path: whole-query substring.
++  const direct = t.indexOf(q);
++  if (direct >= 0) {
++    const atWordStart = direct === 0 || /[^a-z0-9]/.test(t[direct - 1] ?? '');
++    let score = 100 + q.length * 6;
++    if (direct === 0) score += 60;
++    else if (atWordStart) score += 35;
++    score -= Math.min(direct, 20);
++    return { score, positions: range(direct, q.length) };
++  }
++
++  // Subsequence walk with bonuses for word starts and adjacency.
++  let position = 0;
++  let score = 0;
++  let previousIndex = -2;
++  const positions: number[] = [];
++
++  for (const char of q) {
++    let found = -1;
++    for (let i = position; i < t.length; i += 1) {
++      if (t[i] === char) {
++        found = i;
++        break;
++      }
++    }
++    if (found < 0) return null;
++
++    score += 3;
++    if (found === 0 || /[^a-z0-9]/.test(t[found - 1] ?? '')) score += 8;
++    if (found === previousIndex + 1) score += 6;
++    positions.push(found);
++    previousIndex = found;
++    position = found + 1;
++  }
++
++  // Long targets dilute a match; nudge shorter titles up.
++  score -= Math.min(Math.floor(t.length / 12), 12);
++  return { score, positions };
++}
++
++function range(start: number, length: number): number[] {
++  return Array.from({ length }, (_, index) => start + index);
++}
++
++/**
++ * Score a document against every word of the query.
++ *
++ * Words are scored independently and all must match somewhere, which is what
++ * makes "blanket easy" find "Easy Baby Blanket". Matching the query as one
++ * string would fail there, because the words are not adjacent.
++ *
++ * The title is worth the most, the subtitle next, keywords least, so a
++ * keyword-only match never outranks a name.
++ */
++export function scoreDoc(query: string, doc: SearchDoc): SearchHit | null {
++  const terms = fold(query).split(/\s+/).filter(Boolean);
++  if (terms.length === 0) return null;
++
++  let score = 0;
++  const titlePositions: number[] = [];
++
++  for (const term of terms) {
++    const title = scoreText(term, doc.title);
++    const subtitle = doc.subtitle ? scoreText(term, doc.subtitle) : null;
++    const keywords = (doc.keywords ?? [])
++      .map((word) => scoreText(term, word))
++      .filter((hit): hit is { score: number; positions: number[] } => hit !== null);
++
++    const bestKeyword = keywords.reduce((best, hit) => Math.max(best, hit.score * 0.45), 0);
++    const termScore = Math.max(title ? title.score * 1.6 : 0, subtitle ? subtitle.score * 0.7 : 0, bestKeyword);
++
++    // Every word has to land somewhere, or the result is noise.
++    if (termScore === 0) return null;
++
++    score += termScore;
++    if (title) titlePositions.push(...title.positions);
++  }
++
++  return { doc, score, titlePositions: [...new Set(titlePositions)].sort((a, b) => a - b) };
++}
++
++export function search(query: string, docs: SearchDoc[], limit = 12): SearchHit[] {
++  const trimmed = query.trim();
++  if (!trimmed) return docs.slice(0, limit).map((doc) => ({ doc, score: 0, titlePositions: [] }));
++
++  const hits: SearchHit[] = [];
++  for (const doc of docs) {
++    const hit = scoreDoc(trimmed, doc);
++    if (hit) hits.push(hit);
++  }
++
++  hits.sort((a, b) => {
++    if (b.score !== a.score) return b.score - a.score;
++    return a.doc.title.localeCompare(b.doc.title);
++  });
++  return hits.slice(0, limit);
++}
++
++export const TOOL_DOCS: SearchDoc[] = [
++  { id: 'tool/library', title: 'Patterns', subtitle: '526 patterns with filters', group: 'Tools', href: '/library', keywords: ['browse', 'catalog'] },
++  { id: 'tool/checker', title: 'Stitch maths checker', subtitle: 'Verify every row adds up', group: 'Tools', href: '/checker', keywords: ['count', 'validate', 'error', 'maths'] },
++  { id: 'tool/converter', title: 'Converter', subtitle: 'PDF or web page to pattern', group: 'Tools', href: '/converter', keywords: ['import', 'pdf', 'url', 'link'] },
++  { id: 'tool/projects', title: 'Projects', subtitle: 'Row counter and progress', group: 'Tools', href: '/projects', keywords: ['counter', 'wip', 'track'] },
++  { id: 'tool/journal', title: 'Journal', subtitle: 'Photos, notes and measurements', group: 'Tools', href: '/journal', keywords: ['photo', 'diary', 'measure', 'log'] },
++  { id: 'tool/stash', title: 'Yarn stash and planner', subtitle: 'How much yarn, how many skeins', group: 'Tools', href: '/stash', keywords: ['yardage', 'skein', 'estimate', 'shopping'] },
++  { id: 'tool/chart', title: 'Image to chart', subtitle: 'Turn a picture into colourwork', group: 'Tools', href: '/chart', keywords: ['photo', 'pixel', 'colourwork', 'tapestry'] },
++  { id: 'tool/symbols', title: 'Symbol charts', subtitle: 'Written rows as a chart', group: 'Tools', href: '/symbols', keywords: ['diagram', 'symbol', 'visual'] },
++  { id: 'tool/gauge', title: 'Gauge and sizing', subtitle: 'Swatch maths and rescaling', group: 'Tools', href: '/gauge', keywords: ['tension', 'swatch', 'size', 'resize'] },
++  { id: 'tool/terminology', title: 'US / UK translator', subtitle: 'Same pattern, other dialect', group: 'Tools', href: '/terminology', keywords: ['terms', 'translation', 'british', 'american'] },
++  { id: 'tool/stitch-id', title: 'Stitch ID', subtitle: 'Read texture from a photo', group: 'Tools', href: '/stitch-id', keywords: ['identify', 'texture', 'photo'] },
++  { id: 'tool/canvas', title: 'Pattern canvas', subtitle: 'Design your own chart', group: 'Tools', href: '/canvas', keywords: ['design', 'draw', 'create'] },
++  { id: 'tool/settings', title: 'Settings', subtitle: 'Units, AI provider, accessibility', group: 'Tools', href: '/settings', keywords: ['preferences', 'api', 'theme'] },
++];
++
++export interface IndexSources {
++  patterns?: CatalogPattern[];
++  courses?: Array<{ id: string; title: string; lessons: Array<{ id?: string; title: string }> }>;
++  tools?: SearchDoc[];
++}
++
++/**
++ * Build the palette index. Patterns contribute their name, category and skill
++ * level as keywords, so "easy blanket" works without the words being adjacent.
++ */
++export function buildIndex(sources: IndexSources = {}): SearchDoc[] {
++  const docs: SearchDoc[] = [...(sources.tools ?? TOOL_DOCS)];
++
++  for (const pattern of sources.patterns ?? []) {
++    docs.push({
++      id: `pattern/${pattern.id}`,
++      title: pattern.title,
++      subtitle: `${pattern.category} - ${pattern.level}`,
++      group: 'Patterns',
++      href: `/pattern/${pattern.id}`,
++      keywords: [pattern.category, pattern.level, pattern.supplies.yarn ?? '', ...pattern.tags].filter(Boolean),
++    });
++  }
++
++  for (const course of sources.courses ?? []) {
++    for (const lesson of course.lessons) {
++      docs.push({
++        id: `lesson/${course.id}/${lesson.id ?? lesson.title}`,
++        title: lesson.title,
++        subtitle: course.title,
++        group: 'Learn',
++        href: `/courses/${course.id}`,
++        keywords: ['lesson', 'tutorial', 'learn', course.title],
++      });
++    }
++  }
++
++  return docs;
++}
 diff --git a/web/studio/src/domain/stitchAnalyzer.ts b/web/studio/src/domain/stitchAnalyzer.ts
 new file mode 100644
 index 0000000..974dada
@@ -12427,6 +14508,319 @@ index 0000000..974dada
 +  const data = context.getImageData(0, 0, targetSize, targetSize).data;
 +  return toGrayImage(data, targetSize, targetSize);
 +}
+diff --git a/web/studio/src/domain/stitchTokens.ts b/web/studio/src/domain/stitchTokens.ts
+new file mode 100644
+index 0000000..a4959d5
+--- /dev/null
++++ b/web/studio/src/domain/stitchTokens.ts
+@@ -0,0 +1,307 @@
++/**
++ * Ordered stitch tokens.
++ *
++ * The stitch-maths engine (`patternChecker.ts`) answers "how many stitches does
++ * this row make". It deliberately aggregates, because that is all a count check
++ * needs. Two newer consumers need the *order* as well:
++ *
++ *  - the yarn planner, to know how much yarn each stitch type consumes
++ *  - the chart renderer, to draw the row symbol by symbol
++ *
++ * So this is a second, additive view over the same normalized text. It never
++ * answers a count question; `evaluateInstruction` stays the owner of those.
++ * Anything it cannot place becomes an `unknown` token with its raw text kept,
++ * so a chart can show a gap and say why rather than silently closing up.
++ */
++
++import { normalizeInstruction, stripDeclaredCount } from './patternChecker.ts';
++import { findStitch } from './stitches.ts';
++
++export type TokenKind = 'stitch' | 'chain-space' | 'turn' | 'join' | 'unknown';
++
++export interface StitchToken {
++  kind: TokenKind;
++  /** Resolved stitch code, when known. `inc`/`dec` are kept as their own codes. */
++  code: string;
++  /** Human label for the raw text, for error reporting in the UI. */
++  text: string;
++  /** True when this token came from inside a repeated group. */
++  repeated: boolean;
++  /** Which repetition of the group produced it (1-based). 0 when not repeated. */
++  repeatIndex: number;
++  /** Length of the chain space, for `ch-2 sp`. Undefined otherwise. */
++  space?: number;
++  /**
++   * Stitches this token contributes to the row count.
++   *
++   * A cell is not a stitch: an increase is one cell that makes two stitches, and
++   * a decrease is one cell made from two. Any consumer comparing a chart against
++   * the maths engine has to sum this, not count cells.
++   */
++  made: number;
++}
++
++/**
++ * Stitches made by one token, by code. Ordinary stitches are 1; increases are 2;
++ * shells and clusters are groups of 3; everything else is 1.
++ */
++export const MADE_PER_TOKEN: Record<string, number> = {
++  inc: 2,
++  shell: 3,
++  cluster: 3,
++  dec: 1,
++  'ch-sp': 0,
++};
++
++function madeFor(code: string): number {
++  return MADE_PER_TOKEN[code] ?? 1;
++}
++
++export interface TokenSequence {
++  tokens: StitchToken[];
++  /** Raw text the tokenizer could not place, in reading order. */
++  unparsed: string[];
++  /**
++   * True when expansion hit `MAX_TOKENS` and was cut short. Consumers must
++   * refuse to chart or price a truncated sequence rather than present a partial
++   * total as complete.
++   */
++  truncated: boolean;
++}
++
++/**
++ * A row of "x 4000" would otherwise allocate without bound. 4000 tokens is far
++ * beyond any real written row, so hitting the cap means the input is not a row
++ * we understand, not that the pattern is large.
++ */
++export const MAX_TOKENS = 4000;
++
++/** `ch-2 sp`, `2ch sp`, `ch 2 space` all mean a chain space as wide as 2 chains. */
++const CHAIN_SPACE = /^(?:ch|chs)[\s-]*(\d)\s*(?:sp|spc|space)s?$|^(\d)[\s-]*ch\s*(?:sp|spc|space)s?$/;
++
++const TURN = /^(?:turn(?:ing)?(?:\s+work)?|turn\b.*)$/;
++const JOIN = /^(?:join|sl\s?st\s+to\s+join|join\s+with\s+sl\s?st)$/;
++
++/** `sc2tog`, `2 sc tog`, `dc 3 tog` - a decrease over a named stitch. */
++const DECREASE = /^(\d*)\s*([a-z]+)\s*(?:tog|together)$/;
++
++/** A bare multiplier prefix followed by a stitch name: `2 sc`, `3dc`. */
++const COUNTED = /^(\d+)\s*([a-z]+(?:\s+[a-z]+)?)$/;
++
++/** A stitch name followed by a stitch count: `sc 2`, `dc3` means "make 3 dc". */
++const SUFFIXED = /^([a-z]+(?:\s+[a-z]+)?)\s*(\d+)$/;
++
++/** Abbreviations that are real stitches but are not in the catalogue table. */
++const SYNTHETIC: Record<string, string> = {
++  inc: 'inc',
++  '2 sc in': 'inc',
++  dec: 'dec',
++  'sc2tog': 'dec',
++  'sc 2tog': 'dec',
++};
++
++function resolve(word: string): string | null {
++  const cleaned = word.trim().toLowerCase().replace(/\s+/g, ' ');
++  if (!cleaned) return null;
++  const synthetic = SYNTHETIC[cleaned];
++  if (synthetic !== undefined) return synthetic;
++  const st = findStitch(cleaned);
++  return st ? st.code : null;
++}
++
++function makeToken(code: string, text: string, repeatIndex: number): StitchToken {
++  return { kind: 'stitch', code, text, repeated: repeatIndex > 0, repeatIndex, made: madeFor(code) };
++}
++
++/**
++ * Split a normalized instruction into segments, each with the multiplier that
++ * applies to it. Brackets and `x N` are the only grouping syntax we understand;
++ * anything else is left in the text and reported.
++ *
++ * `[sc, ch 1] x 6`  ->  one segment, multiplier 6
++ * `sc in next 2 sts` ->  one segment, multiplier 1
++ */
++interface Segment {
++  body: string;
++  times: number;
++}
++
++function splitSegments(text: string): Segment[] {
++  const segments: Segment[] = [];
++  // Bracket groups first: [ ... ] x N  |  ( ... ) x N  |  { ... } x N
++  const groupRe = /[[({]([^\]})]*)[)\]}]\s*(?:x\s*(\d+)|(\d+)\s*times?)?/gi;
++  let lastIndex = 0;
++  let match: RegExpExecArray | null;
++
++  const pushPlain = (chunk: string) => {
++    const parts = chunk.split(/\s*,\s*|\s+and\s+/i);
++    for (const part of parts) {
++      if (part.trim()) segments.push({ body: part.trim(), times: 1 });
++    }
++  };
++
++  while ((match = groupRe.exec(text)) !== null) {
++    pushPlain(text.slice(lastIndex, match.index));
++    const times = Number(match[2] ?? match[3] ?? 1) || 1;
++    segments.push({ body: match[1] ?? '', times });
++    lastIndex = match.index + match[0].length;
++  }
++  pushPlain(text.slice(lastIndex));
++  return segments;
++}
++
++/**
++ * Turn one written instruction into ordered tokens.
++ *
++ * Repetition is expanded, because both consumers need the literal sequence: a
++ * chart has to draw 24 cells, not "6 groups of 4". Groups nested more than one
++ * level deep are not expanded; the inner text is reported instead.
++ */
++export function tokenizeInstruction(instruction: string): TokenSequence {
++  const tokens: StitchToken[] = [];
++  const unparsed: string[] = [];
++  let truncated = false;
++
++  const text = normalizeInstruction(stripDeclaredCount(instruction));
++  if (!text) return { tokens, unparsed, truncated };
++
++  const segments = splitSegments(text);
++
++  for (const segment of segments) {
++    const once: StitchToken[] = [];
++    const body = segment.body.trim();
++    if (!body) continue;
++
++    const pieces = body.split(/\s*,\s*|\s+and\s+/i).filter((p) => p.trim());
++    for (const piece of pieces.length ? pieces : [body]) {
++      const raw = piece.trim();
++      if (!raw) continue;
++
++      const space = CHAIN_SPACE.exec(raw);
++      if (space) {
++        once.push({
++          kind: 'chain-space',
++          code: 'ch-sp',
++          text: raw,
++          repeated: false,
++          repeatIndex: 0,
++          space: Number(space[1] ?? space[2] ?? 1),
++          made: 0,
++        });
++        continue;
++      }
++
++      if (TURN.test(raw)) {
++        once.push({ kind: 'turn', code: 'turn', text: raw, repeated: false, repeatIndex: 0, made: 0 });
++        continue;
++      }
++      if (JOIN.test(raw)) {
++        once.push({ kind: 'join', code: 'join', text: raw, repeated: false, repeatIndex: 0, made: 0 });
++        continue;
++      }
++
++      const dec = DECREASE.exec(raw);
++      if (dec) {
++        const base = resolve(dec[2] ?? '');
++        if (base) {
++          // A decrease token carries its base stitch so the chart can draw the
++          // right symbol; the count is one stitch made from two.
++          once.push({
++            kind: 'stitch',
++            code: 'dec',
++            text: raw,
++            repeated: false,
++            repeatIndex: 0,
++            made: 1,
++          });
++          continue;
++        }
++      }
++
++      const counted = COUNTED.exec(raw);
++      if (counted) {
++        const code = resolve(counted[2] ?? '');
++        if (code) {
++          const n = Math.min(Number(counted[1] ?? 0), MAX_TOKENS);
++          for (let i = 0; i < n; i += 1) {
++            once.push(makeToken(code, raw, 0));
++          }
++          continue;
++        }
++      }
++
++      const suffixed = SUFFIXED.exec(raw);
++      if (suffixed) {
++        const code = resolve(suffixed[1] ?? '');
++        if (code) {
++          const n = Math.min(Number(suffixed[2] ?? 0), MAX_TOKENS);
++          for (let i = 0; i < n; i += 1) {
++            once.push(makeToken(code, raw, 0));
++          }
++          continue;
++        }
++      }
++
++      const single = resolve(raw);
++      if (single) {
++        once.push(makeToken(single, raw, 0));
++        continue;
++      }
++
++      // Distributive wording such as "sc in each st across": the stitch is the
++      // first word and the rest is placement, which a chart cannot draw without
++      // knowing the previous row. Report the placement, keep the stitch.
++      const lead = /^([a-z]+)\s+(.+)$/.exec(raw);
++      const leadCode = lead ? resolve(lead[1] ?? '') : null;
++      if (leadCode) {
++        once.push(makeToken(leadCode, raw, 0));
++        unparsed.push(lead ? (lead[2] ?? raw) : raw);
++        continue;
++      }
++
++      once.push({ kind: 'unknown', code: 'unknown', text: raw, repeated: false, repeatIndex: 0, made: 0 });
++      unparsed.push(raw);
++    }
++
++    const multi = segment.times > 1;
++    const times = Math.max(1, segment.times);
++
++    if (segment.times > MAX_TOKENS || tokens.length + once.length * times > MAX_TOKENS) {
++      truncated = true;
++      break;
++    }
++
++    for (let r = 1; r <= times; r += 1) {
++      for (const token of once) {
++        tokens.push({
++          ...token,
++          repeated: multi,
++          repeatIndex: multi ? r : 0,
++        });
++      }
++    }
++  }
++
++  return { tokens, unparsed, truncated };
++}
++
++/** Stitches made by a token sequence, the figure the maths engine reports. */
++export function madeBy(tokens: StitchToken[], options: { includeChains?: boolean } = {}): number {
++  const includeChains = options.includeChains ?? false;
++  let total = 0;
++  for (const token of tokens) {
++    if (!includeChains && (token.code === 'ch' || token.code === 'ch-sp')) continue;
++    total += token.made;
++  }
++  return total;
++}
++
++/** Token counts by resolved code, for the yarn planner. */
++export function countByCode(tokens: StitchToken[]): Record<string, number> {
++  const counts: Record<string, number> = {};
++  for (const token of tokens) {
++    if (token.kind !== 'stitch') continue;
++    counts[token.code] = (counts[token.code] ?? 0) + 1;
++  }
++  return counts;
++}
 diff --git a/web/studio/src/domain/stitches.ts b/web/studio/src/domain/stitches.ts
 new file mode 100644
 index 0000000..1a175b2
@@ -12717,6 +15111,226 @@ index 0000000..1a175b2
 +  if (/\(us\)|us terms|us terminology|american terms/.test(lower)) return 'us';
 +  return 'unknown';
 +}
+diff --git a/web/studio/src/domain/symbols.ts b/web/studio/src/domain/symbols.ts
+new file mode 100644
+index 0000000..b63e9a8
+--- /dev/null
++++ b/web/studio/src/domain/symbols.ts
+@@ -0,0 +1,214 @@
++/**
++ * Written row -> symbol chart.
++ *
++ * A chart is the same information as a written row, addressed to the eye. The
++ * hard part is not drawing symbols, it is deciding where each symbol goes, so
++ * that decision lives here, in a pure function, and the React layer only paints.
++ *
++ * Layout rule: one cell per stitch, in reading order. Repeated groups are
++ * expanded by `stitchTokens`, so a chart cell never stands for "x 6" - the
++ * reader can count cells. Turning chains and joins are kept as their own cells
++ * because they occupy a position in the row, but they are marked so the UI can
++ * draw them lighter.
++ */
++
++import type { ParsedPattern, PatternStep } from '../shared/types.ts';
++import { madeBy, tokenizeInstruction, type StitchToken } from './stitchTokens.ts';
++
++/** A 24x24 box, the coordinate space every symbol below is drawn in. */
++export const CELL = 24;
++
++export interface SymbolShape {
++  /** Stroked paths in the 24x24 box. */
++  paths: string[];
++  /** Filled shapes, drawn after the strokes. */
++  fills?: string[];
++  /** Dot centres, drawn as small filled circles. */
++  dots?: Array<{ cx: number; cy: number; r: number }>;
++  /** Shown in the chart legend. */
++  label: string;
++  /** True for tokens that are not counted stitches. */
++  quiet?: boolean;
++}
++
++/**
++ * Standard internationally used crochet chart symbols:
++ * x for sc, T for hdc, T with a slash per extra height, a dot for slip stitch,
++ * an oval for chain. A decrease is drawn as two strokes converging into one
++ * cell; a decrease at a cell boundary would misrepresent which stitches merged.
++ */
++/** Drawn for any token we could not place. Never silently blank. */
++const UNKNOWN: SymbolShape = {
++  paths: ['M4 4h16v16H4z', 'M10 9a2 2 0 1 1 2 2v1', 'M12 16v.5'],
++  label: 'not understood',
++};
++
++const SYMBOLS: Record<string, SymbolShape> = {
++  ch: { paths: ['M6 12a6 4 0 1 0 12 0a6 4 0 1 0 -12 0'], label: 'chain' },
++  slst: { paths: [], dots: [{ cx: 12, cy: 12, r: 2.6 }], label: 'slip stitch' },
++  sc: { paths: ['M5 5l14 14', 'M19 5l-14 14'], label: 'single crochet' },
++  hdc: { paths: ['M12 4v16', 'M4 8h16'], label: 'half double crochet' },
++  dc: { paths: ['M12 4v16', 'M4 8h16', 'M7 15l10-6'], label: 'double crochet' },
++  tr: { paths: ['M12 4v16', 'M4 8h16', 'M6 16l10-6', 'M10 18l10-6'], label: 'treble crochet' },
++  dtr: {
++    paths: ['M12 4v16', 'M4 8h16', 'M5 15l10-6', 'M9 17l10-6', 'M13 19l9-5'],
++    label: 'double treble',
++  },
++  fsc: { paths: ['M5 5l14 14', 'M19 5l-14 14', 'M3 3v6'], label: 'foundation single crochet' },
++  inc: { paths: ['M4 16l6-12', 'M10 4l6 12', 'M4 8l12 0'], label: 'increase' },
++  dec: { paths: ['M4 4l8 14', 'M20 4l-8 14', 'M8 20h8'], label: 'decrease' },
++  bobble: { paths: [], fills: ['M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0 -16'], label: 'bobble' },
++  puff: {
++    paths: [],
++    fills: ['M12 5a7 7 0 0 1 0 14a7 7 0 0 1 0 -14'],
++    dots: [
++      { cx: 9, cy: 10, r: 1.4 },
++      { cx: 15, cy: 10, r: 1.4 },
++      { cx: 12, cy: 15, r: 1.4 },
++    ],
++    label: 'puff stitch',
++  },
++  shell: {
++    paths: ['M6 6v14', 'M6 6c4 7 8 7 12 0', 'M12 6v14', 'M18 6v14'],
++    label: 'shell',
++  },
++  cluster: {
++    paths: ['M6 6v10', 'M12 6v10', 'M18 6v10', 'M4 18c4 4 12 4 16 0'],
++    label: 'cluster',
++  },
++  'ch-sp': { paths: ['M5 12a7 4 0 1 0 14 0a7 4 0 1 0 -14 0'], label: 'chain space', quiet: true },
++  turn: { paths: ['M4 16h10a5 5 0 0 0 0-10H9', 'M11 3l-3 3 3 3'], label: 'turn', quiet: true },
++  join: { paths: ['M6 12a6 6 0 1 0 6 6', 'M12 6a6 6 0 0 1 6 6'], label: 'join', quiet: true },
++  unknown: UNKNOWN,
++};
++
++export function symbolFor(code: string): SymbolShape {
++  return SYMBOLS[code] ?? UNKNOWN;
++}
++
++/** Every symbol that can appear, for a legend. Excludes the error glyph. */
++export function symbolLegend(): Array<{ code: string; label: string; quiet: boolean }> {
++  return Object.entries(SYMBOLS)
++    .filter(([code]) => code !== 'unknown')
++    .map(([code, shape]) => ({ code, label: shape.label, quiet: shape.quiet === true }));
++}
++
++export interface ChartCell {
++  token: StitchToken;
++  column: number;
++}
++
++export interface ChartRow {
++  index: number;
++  label: string;
++  cells: ChartCell[];
++  /** Fragments of this row the tokenizer could not place. */
++  unparsed: string[];
++  /** True when this row was cut short; the chart is not a complete view. */
++  truncated: boolean;
++}
++
++export interface Chart {
++  rows: ChartRow[];
++  /** Widest row, so every row can be padded to a common width. */
++  width: number;
++  /** Steps that produced no cells at all (notes, prose finishing). */
++  skipped: string[];
++  /** True when any row was truncated. */
++  truncated: boolean;
++}
++
++export interface ChartOptions {
++  /** Stop after this many rows. Defaults to 80, enough for any real chart. */
++  maxRows?: number;
++}
++
++export const DEFAULT_MAX_ROWS = 80;
++
++/**
++ * Build the chart. Rows are ordered as written; note steps are skipped because
++ * they have no stitches to place, but they are reported in `skipped` so a caller
++ * can say "3 notes were not charted" instead of quietly dropping them.
++ */
++export function buildChart(pattern: ParsedPattern, options: ChartOptions = {}): Chart {
++  const maxRows = options.maxRows ?? DEFAULT_MAX_ROWS;
++  const rows: ChartRow[] = [];
++  const skipped: string[] = [];
++  let width = 0;
++  let truncated = false;
++
++  for (const step of pattern.steps) {
++    if (rows.length >= maxRows) break;
++    const row = chartRow(step);
++    if (!row) {
++      skipped.push(step.label);
++      continue;
++    }
++    if (row.cells.length === 0) {
++      skipped.push(step.label);
++      continue;
++    }
++    if (row.truncated) truncated = true;
++    width = Math.max(width, row.cells.length);
++    rows.push(row);
++  }
++
++  return { rows, width, skipped, truncated };
++}
++
++function chartRow(step: PatternStep): ChartRow | null {
++  if (step.kind === 'note') return null;
++  const { tokens, unparsed, truncated } = tokenizeInstruction(step.instruction);
++  if (!tokens.length) return null;
++  return {
++    index: step.index,
++    label: step.label,
++    cells: tokens.map((token, column) => ({ token, column })),
++    unparsed,
++    truncated,
++  };
++}
++
++/**
++ * Where a repeated group starts a new repetition. The renderer draws a hairline
++ * at these columns so a reader can see the repeat without counting, which is the
++ * whole reason someone reaches for a chart.
++ */
++export function repeatBoundaries(row: ChartRow): number[] {
++  const boundaries: number[] = [];
++  let previous = 0;
++  for (const cell of row.cells) {
++    if (cell.token.repeatIndex !== previous) {
++      if (cell.column > 0) boundaries.push(cell.column);
++      previous = cell.token.repeatIndex;
++    }
++  }
++  return boundaries;
++}
++
++/**
++ * The chart's claim: the stitches the drawn symbols *make* equal the count the
++ * maths engine computed for that row.
++ *
++ * Not the number of cells. An increase is one cell that makes two stitches, so
++ * counting cells would report a disagreement on every increase round. Foundation
++ * rows are the exception: there the chains are the count, so both readings are
++ * tried before declaring a mismatch.
++ */
++export function chartAgreesWith(row: ChartRow, computedCount: number | undefined): boolean | null {
++  if (computedCount === undefined) return null;
++  /*
++   * A row with distributive wording ("sc in each st across") draws one symbol
++   * standing for an unknown number of stitches. The drawing cannot agree or
++   * disagree with a count it does not represent, so it reports unknown rather
++   * than raising a false alarm on every such row.
++   */
++  if (row.unparsed.length > 0) return null;
++  const tokens = row.cells.map((cell) => cell.token);
++  return madeBy(tokens) === computedCount || madeBy(tokens, { includeChains: true }) === computedCount;
++}
++
++/** Stitches the drawn symbols make, for display next to the computed count. */
++export function chartMade(row: ChartRow): number {
++  return madeBy(row.cells.map((cell) => cell.token));
++}
 diff --git a/web/studio/src/domain/terminology.ts b/web/studio/src/domain/terminology.ts
 new file mode 100644
 index 0000000..7b76c85
@@ -12896,6 +15510,375 @@ index 0000000..7b76c85
 +      };
 +    })
 +    .sort((a, b) => a.note.localeCompare(b.note) || a.from.localeCompare(b.from));
++}
+diff --git a/web/studio/src/domain/yarn.ts b/web/studio/src/domain/yarn.ts
+new file mode 100644
+index 0000000..5dc506d
+--- /dev/null
++++ b/web/studio/src/domain/yarn.ts
+@@ -0,0 +1,363 @@
++/**
++ * Yarn planning.
++ *
++ * Two questions, both answered from measurements the user supplies rather than
++ * from a table we invented:
++ *
++ *  - "how much yarn is this pattern going to take?"
++ *  - "how many skeins do I need, and what is left over?"
++ *
++ * The first question needs a gauge, because yarn per stitch is proportional to
++ * stitch size. Without a gauge this module refuses and says what is missing; it
++ * never substitutes a default tension, which is the single most common way a
++ * yarn estimate goes wrong by 40%.
++ *
++ * The consumption factors below are relative, not absolute: they are multiples
++ * of the width of one stitch, derived from stitch geometry (a taller stitch
++ * travels further per stitch). `sc` is the baseline at 2.6. These are a model,
++ * so the UI labels every result as an estimate and the measured-swatch path is
++ * offered as the authoritative alternative.
++ */
++
++import type { ParsedPattern, PatternStep } from '../shared/types.ts';
++import { countByCode, tokenizeInstruction } from './stitchTokens.ts';
++import { stitchByCode } from './stitches.ts';
++
++/**
++ * Yarn consumed by one stitch, as a multiple of that stitch's own width.
++ *
++ * Geometry: a stitch leaves the hook, crosses its own width, and comes back
++ * plus the height it gains. Chain and slip stitch barely travel; bobbles and
++ * shells draw from several loops at once and so cost more than their height
++ * suggests.
++ */
++export const YARN_PER_WIDTH: Record<string, number> = {
++  ch: 1.6,
++  slst: 0.9,
++  sc: 2.6,
++  hdc: 3.4,
++  dc: 4.6,
++  tr: 5.8,
++  dtr: 7.0,
++  fsc: 2.6,
++  inc: 2.9,
++  dec: 2.4,
++  bobble: 9.5,
++  puff: 8.0,
++  shell: 12.0,
++  cluster: 6.5,
++  'ch-sp': 1.6,
++};
++
++/** Used when a step references a stitch we have no factor for. */
++export const FALLBACK_FACTOR = 2.6;
++
++export interface GaugeInput {
++  /** Stitches measured over 10 cm. */
++  stitchesPer10cm?: number;
++  /** Rows measured over 10 cm. */
++  rowsPer10cm?: number;
++}
++
++export interface GaugeProblem {
++  ok: false;
++  problem: string;
++}
++
++export interface GaugeOk {
++  ok: true;
++  /** Average width of one stitch, in cm. */
++  stitchWidthCm: number;
++  /** Average height of one row, in cm. */
++  rowHeightCm?: number;
++}
++
++export type GaugeCheck = GaugeOk | GaugeProblem;
++
++/**
++ * Validate a measured gauge. Both numbers are optional, but at least a stitch
++ * count is required to price a pattern, and a nonsense value is refused rather
++ * than clamped.
++ */
++export function checkGauge(gauge: GaugeInput): GaugeCheck {
++  const { stitchesPer10cm, rowsPer10cm } = gauge;
++  if (!stitchesPer10cm || Number.isNaN(stitchesPer10cm)) {
++    return {
++      ok: false,
++      problem: 'Measure your swatch: how many stitches fit in 10 cm? Without that a yarn estimate is a guess.',
++    };
++  }
++  if (stitchesPer10cm <= 0) {
++    return { ok: false, problem: 'Stitches per 10 cm must be greater than zero.' };
++  }
++  if (stitchesPer10cm > 200) {
++    return { ok: false, problem: 'More than 200 stitches in 10 cm is not a real gauge. Check the measurement.' };
++  }
++  if (rowsPer10cm !== undefined && (Number.isNaN(rowsPer10cm) || rowsPer10cm <= 0 || rowsPer10cm > 200)) {
++    return { ok: false, problem: 'Rows per 10 cm must be between 1 and 200.' };
++  }
++  return {
++    ok: true,
++    stitchWidthCm: 10 / stitchesPer10cm,
++    rowHeightCm: rowsPer10cm ? 10 / rowsPer10cm : undefined,
++  };
++}
++
++export interface StepCost {
++  index: number;
++  label: string;
++  /** Length of yarn used by this step, in cm. */
++  cm: number;
++  stitches: number;
++  /** Stitch codes with no factor, so the user knows the total is a floor. */
++  unknownCodes: string[];
++}
++
++export interface YarnEstimate {
++  ok: true;
++  totalCm: number;
++  totalMetres: number;
++  totalYards: number;
++  steps: StepCost[];
++  /** Stitch codes that were priced with the fallback factor. */
++  fallbackCodes: string[];
++  /** True when a step could not be tokenized and the total excludes it. */
++  incomplete: boolean;
++}
++
++export interface YarnProblem {
++  ok: false;
++  problem: string;
++}
++
++export type YarnResult = YarnEstimate | YarnProblem;
++
++/**
++ * Price every step of a parsed pattern.
++ *
++ * Chain counts are included: chains consume yarn. Turning chains are part of
++ * the instruction text and are counted by the tokenizer as `ch` tokens, which is
++ * what we want for a yarn total even though a count check ignores them.
++ */
++export function estimateYarn(pattern: ParsedPattern, gauge: GaugeInput): YarnResult {
++  const check = checkGauge(gauge);
++  if (!check.ok) return check;
++
++  const width = check.stitchWidthCm;
++  const steps: StepCost[] = [];
++  const fallbackCodes = new Set<string>();
++  let incomplete = false;
++
++  for (const step of pattern.steps) {
++    const cost = priceStep(step, width);
++    if (cost === null) {
++      incomplete = true;
++      continue;
++    }
++    for (const code of cost.unknownCodes) fallbackCodes.add(code);
++    steps.push(cost);
++  }
++
++  const totalCm = steps.reduce((sum, step) => sum + step.cm, 0);
++  return {
++    ok: true,
++    totalCm,
++    totalMetres: totalCm / 100,
++    totalYards: totalCm / 91.44,
++    steps,
++    fallbackCodes: [...fallbackCodes].sort(),
++    incomplete,
++  };
++}
++
++/**
++ * Price one step. Returns null for steps that carry no yarn (notes, finishing
++ * prose) so they do not appear as zero-cost rows in the breakdown.
++ */
++function priceStep(step: PatternStep, widthCm: number): StepCost | null {
++  if (step.kind === 'note') return null;
++  const { tokens } = tokenizeInstruction(step.instruction);
++  if (tokens.length === 0) return null;
++
++  const counts = countByCode(tokens);
++  let cm = 0;
++  const unknownCodes: string[] = [];
++  let stitches = 0;
++
++  for (const [code, count] of Object.entries(counts)) {
++    let factor = YARN_PER_WIDTH[code];
++    if (factor === undefined) {
++      factor = FALLBACK_FACTOR;
++      if (!stitchByCode(code) || YARN_PER_WIDTH[code] === undefined) unknownCodes.push(code);
++    }
++    cm += count * factor * widthCm;
++    stitches += count;
++  }
++
++  // Chain spaces are not stitch tokens but they hold a chain's worth of yarn.
++  const spaces = tokens.filter((t) => t.kind === 'chain-space');
++  for (const space of spaces) {
++    cm += (space.space ?? 1) * (YARN_PER_WIDTH.ch ?? 1.6) * widthCm;
++  }
++
++  return { index: step.index, label: step.label, cm, stitches, unknownCodes };
++}
++
++/* ------------------------------------------------------------------- skeins */
++
++export interface SkeinPlanInput {
++  /** Yarn needed, in metres. */
++  neededMetres: number;
++  /** Length of one skein, in metres. */
++  skeinMetres: number;
++  /** Extra allowance for joins, tension changes and swatching, as a fraction. */
++  waste?: number;
++  /** Price of one skein, in the user's currency. Optional. */
++  pricePerSkein?: number;
++}
++
++export interface SkeinPlan {
++  ok: true;
++  /**
++   * True when the allowance pushed the requirement over a whole skein boundary,
++   * which is the difference between "buy 3" and "buy 4".
++   */
++  wasteChangedCount: boolean;
++  wasteFraction: number;
++  neededMetres: number;
++  withWasteMetres: number;
++  skeins: number;
++  purchasedMetres: number;
++  leftoverMetres: number;
++  leftoverFraction: number;
++  cost?: number;
++}
++
++export interface SkeinProblem {
++  ok: false;
++  problem: string;
++}
++
++export type SkeinResult = SkeinPlan | SkeinProblem;
++
++/** Default allowance. 10% covers a swatch plus joins without hiding real shortfalls. */
++export const DEFAULT_WASTE = 0.1;
++
++export function planSkeins(input: SkeinPlanInput): SkeinResult {
++  const { neededMetres, skeinMetres, pricePerSkein } = input;
++  const waste = input.waste ?? DEFAULT_WASTE;
++
++  if (!Number.isFinite(neededMetres) || neededMetres <= 0) {
++    return { ok: false, problem: 'Yarn requirement must be greater than zero.' };
++  }
++  if (!Number.isFinite(skeinMetres) || skeinMetres <= 0) {
++    return {
++      ok: false,
++      problem: 'Skein length must be greater than zero. Check the label: yards and metres are not the same number.',
++    };
++  }
++  if (waste < 0 || waste > 1) {
++    return { ok: false, problem: 'Allowance must be between 0% and 100%.' };
++  }
++
++  const withWaste = neededMetres * (1 + waste);
++  const rawSkeins = withWaste / skeinMetres;
++  const skeins = Math.ceil(rawSkeins - 1e-9);
++  const purchased = skeins * skeinMetres;
++  const leftover = purchased - withWaste;
++  const bareSkeins = Math.ceil(neededMetres / skeinMetres - 1e-9);
++
++  return {
++    ok: true,
++    wasteChangedCount: skeins > bareSkeins,
++    wasteFraction: waste,
++    neededMetres,
++    withWasteMetres: withWaste,
++    skeins,
++    purchasedMetres: purchased,
++    leftoverMetres: leftover,
++    leftoverFraction: purchased > 0 ? leftover / purchased : 0,
++    cost: pricePerSkein !== undefined ? pricePerSkein * skeins : undefined,
++  };
++}
++
++/* -------------------------------------------------------------------- units */
++
++export const CM_PER_INCH = 2.54;
++export const CM_PER_YARD = 91.44;
++export const CM_PER_METRE = 100;
++
++/** Yarn labels mix yards and metres; every comparison here is in metres. */
++export function toMetres(value: number, unit: 'm' | 'yd' | 'ft' | 'cm'): number {
++  switch (unit) {
++    case 'yd':
++      return (value * CM_PER_YARD) / CM_PER_METRE;
++    case 'ft':
++      return (value * 12 * CM_PER_INCH) / CM_PER_METRE;
++    case 'cm':
++      return value / CM_PER_METRE;
++    default:
++      return value;
++  }
++}
++
++export function formatLength(metres: number): string {
++  if (!Number.isFinite(metres)) return '-';
++  if (metres < 1) return `${Math.round(metres * 100)} cm`;
++  if (metres < 10) return `${metres.toFixed(2)} m`;
++  return `${Math.round(metres)} m`;
++}
++
++/* -------------------------------------------------------- measured swatch */
++
++export interface SwatchMeasurement {
++  /** Yarn used by the swatch, in metres. */
++  yarnMetres: number;
++  /** Stitches in the swatch. */
++  stitches: number;
++  /** Rows in the swatch, for a per-row figure. */
++  rows?: number;
++}
++
++/**
++ * The authoritative path: you crocheted a swatch, you know exactly how much yarn
++ * it ate, so scale by stitch count. No model, no factors. Returns null when the
++ * measurement is not usable.
++ */
++export function metresPerStitch(sample: SwatchMeasurement): number | null {
++  if (!Number.isFinite(sample.yarnMetres) || sample.yarnMetres <= 0) return null;
++  if (!Number.isFinite(sample.stitches) || sample.stitches <= 0) return null;
++  return sample.yarnMetres / sample.stitches;
++}
++
++export function estimateFromSwatch(
++  pattern: ParsedPattern,
++  metresPerStitchValue: number,
++): YarnResult {
++  if (!Number.isFinite(metresPerStitchValue) || metresPerStitchValue <= 0) {
++    return { ok: false, problem: 'Measure how much yarn one stitch uses, or use the gauge model instead.' };
++  }
++  const steps: StepCost[] = [];
++  let totalCm = 0;
++  let incomplete = false;
++
++  for (const step of pattern.steps) {
++    if (step.kind === 'note') continue;
++    const { tokens } = tokenizeInstruction(step.instruction);
++    if (!tokens.length) continue;
++    const stitches = tokens.filter((t) => t.kind === 'stitch' || t.kind === 'chain-space').length;
++    const cm = stitches * metresPerStitchValue * 100;
++    totalCm += cm;
++    steps.push({ index: step.index, label: step.label, cm, stitches, unknownCodes: [] });
++  }
++
++  return {
++    ok: true,
++    totalCm,
++    totalMetres: totalCm / 100,
++    totalYards: totalCm / CM_PER_YARD,
++    steps,
++    fallbackCodes: [],
++    incomplete,
++  };
 +}
 diff --git a/web/studio/src/server/app.ts b/web/studio/src/server/app.ts
 new file mode 100644
@@ -13302,10 +16285,10 @@ index 0000000..ef31458
 +}
 diff --git a/web/studio/src/shared/types.ts b/web/studio/src/shared/types.ts
 new file mode 100644
-index 0000000..775012f
+index 0000000..614061a
 --- /dev/null
 +++ b/web/studio/src/shared/types.ts
-@@ -0,0 +1,329 @@
+@@ -0,0 +1,385 @@
 +/**
 + * Shared contracts for YarnCraft Studio.
 + *
@@ -13520,6 +16503,56 @@ index 0000000..775012f
 +  elapsedSeconds: number;
 +}
 +
++/* ------------------------------------------------------------------- stash */
++
++/** One yarn the maker owns, or is thinking of buying. */
++export interface StashYarn {
++  id: string;
++  name: string;
++  brand?: string;
++  /** Yarn weight code from the standard 0-7 scale. */
++  weight: string;
++  /** Total length of one skein, in metres. Metres so yards/labels compare. */
++  skeinMetres: number;
++  /** Skeins on hand. */
++  skeins: number;
++  colour?: string;
++  /** Purchase price per skein, in the user's currency. */
++  pricePerSkein?: number;
++  notes?: string;
++  addedAt: number;
++}
++
++/** A saved yarn requirement, so a plan can be revisited after buying. */
++export interface YarnPlan {
++  id: string;
++  name: string;
++  neededMetres: number;
++  skeinMetres: number;
++  skeins: number;
++  createdAt: number;
++}
++
++/* ----------------------------------------------------------------- journal */
++
++export type JournalKind = 'note' | 'photo' | 'measure' | 'milestone';
++
++/**
++ * One journal entry. Kept in `shared` rather than imported from the domain so
++ * the persisted shape never depends on a domain module's internals.
++ */
++export interface JournalRecord {
++  id: string;
++  projectId: string;
++  at: string;
++  kind: JournalKind;
++  text: string;
++  image?: string;
++  width?: number;
++  height?: number;
++  label?: string;
++}
++
 +/* ------------------------------------------------------------------ canvas */
 +
 +export const CANVAS_SYMBOLS = [
@@ -13634,6 +16667,12 @@ index 0000000..775012f
 +  stitchAnalyses: SavedStitchAnalysis[];
 +  /** ISO date (YYYY-MM-DD) -> rows completed that day. */
 +  activity: Record<string, number>;
++  /** Yarns on hand. */
++  stash: StashYarn[];
++  /** Saved yarn requirement plans. */
++  yarnPlans: YarnPlan[];
++  /** Journal entries across all projects. */
++  journal: JournalRecord[];
 +}
 diff --git a/web/studio/src/tests/analysis.test.ts b/web/studio/src/tests/analysis.test.ts
 new file mode 100644
@@ -14043,6 +17082,505 @@ index 0000000..1ceaef5
 +    const grid = downsample(pixels, 2, 2, { width: 6, height: 6 });
 +    expect(grid).toHaveLength(36);
 +    expect(grid.every((pixel) => pixel.r === RED.r)).toBe(true);
++  });
++});
+diff --git a/web/studio/src/tests/features2.test.ts b/web/studio/src/tests/features2.test.ts
+new file mode 100644
+index 0000000..7629525
+--- /dev/null
++++ b/web/studio/src/tests/features2.test.ts
+@@ -0,0 +1,493 @@
++import { describe, expect, it } from 'vitest';
++import { countByCode, madeBy, MAX_TOKENS, tokenizeInstruction } from '../domain/stitchTokens.ts';
++import {
++  checkGauge,
++  estimateFromSwatch,
++  estimateYarn,
++  formatLength,
++  metresPerStitch,
++  planSkeins,
++  toMetres,
++  YARN_PER_WIDTH,
++} from '../domain/yarn.ts';
++import {
++  buildChart,
++  chartAgreesWith,
++  chartMade,
++  repeatBoundaries,
++  symbolFor,
++  symbolLegend,
++} from '../domain/symbols.ts';
++import {
++  addEntry,
++  dataUrlBytes,
++  fitWithin,
++  groupByDay,
++  journalBytes,
++  makeEntryId,
++  measurementLabels,
++  measurementTrend,
++  removeEntry,
++  sortEntries,
++  trimToBudget,
++} from '../domain/journal.ts';
++import { buildIndex, scoreDoc, scoreText, search, TOOL_DOCS } from '../domain/search.ts';
++import { parsePattern } from '../domain/patternParser.ts';
++import { evaluateInstruction } from '../domain/patternChecker.ts';
++import type { JournalEntry } from '../domain/journal.ts';
++import type { CatalogPattern } from '../shared/types.ts';
++
++/* --------------------------------------------------------------- tokens */
++
++describe('stitch tokenizer', () => {
++  it('expands a bracketed repeat into individual stitches', () => {
++    const { tokens } = tokenizeInstruction('[sc, inc] x 6');
++    expect(tokens).toHaveLength(12);
++    expect(tokens.filter((token) => token.code === 'sc')).toHaveLength(6);
++    expect(tokens.filter((token) => token.code === 'inc')).toHaveLength(6);
++  });
++
++  it('honours a leading count', () => {
++    const { tokens } = tokenizeInstruction('3 dc');
++    expect(tokens).toHaveLength(3);
++    expect(tokens.every((token) => token.code === 'dc')).toBe(true);
++  });
++
++  it('reads a decrease as one token, not as two stitches', () => {
++    const { tokens } = tokenizeInstruction('sc2tog');
++    expect(tokens).toHaveLength(1);
++    expect(tokens[0]!.code).toBe('dec');
++  });
++
++  it('keeps the width of a chain space', () => {
++    const { tokens } = tokenizeInstruction('ch-2 sp');
++    expect(tokens[0]!.kind).toBe('chain-space');
++    expect(tokens[0]!.space).toBe(2);
++  });
++
++  it('marks which repetition each token belongs to', () => {
++    const { tokens } = tokenizeInstruction('[2 sc, ch 1] x 3');
++    const repeatedSc = tokens.filter((token) => token.code === 'sc');
++    expect(new Set(repeatedSc.map((token) => token.repeatIndex))).toEqual(new Set([1, 2, 3]));
++    expect(repeatedSc.every((token) => token.repeated)).toBe(true);
++  });
++
++  it('counts an increase as two stitches and a decrease as one', () => {
++    // The cell count and the stitch count are different numbers, on purpose.
++    const { tokens } = tokenizeInstruction('[sc, inc] x 6');
++    expect(tokens).toHaveLength(12);
++    expect(madeBy(tokens)).toBe(18);
++    expect(madeBy(tokens)).toBe(evaluateInstruction('[sc, inc] x 6').count);
++  });
++
++  it('agrees with the count engine on a plain repeated row', () => {
++    const text = '[2 sc, ch 1] x 6';
++    const { tokens } = tokenizeInstruction(text);
++    expect(madeBy(tokens)).toBe(evaluateInstruction(text).count);
++  });
++
++  it('reports unknown rather than disagreeing when a row cannot be fully placed', () => {
++    // "sc in each ch across" means one stitch per previous chain. Without the
++    // previous row there is no number to draw, so the chart must not guess.
++    const text = 'ch 21, sc in 2nd ch from hook and each ch across';
++    const pattern = parsePattern(`Row 1: ${text}`);
++    const row = buildChart(pattern).rows[0]!;
++    expect(row.unparsed.length).toBeGreaterThan(0);
++    expect(chartAgreesWith(row, 20)).toBeNull();
++  });
++
++  it('reports text it cannot place instead of dropping it', () => {
++    const { unparsed, tokens } = tokenizeInstruction('sc, then do the impossible bit');
++    expect(unparsed.join(' ')).toContain('impossible');
++    expect(tokens.some((token) => token.kind === 'unknown')).toBe(true);
++  });
++
++  it('refuses to expand an absurd multiplier', () => {
++    const { tokens, truncated } = tokenizeInstruction('[sc] x 99999');
++    expect(truncated).toBe(true);
++    expect(tokens.length).toBeLessThanOrEqual(MAX_TOKENS);
++  });
++});
++
++/* ----------------------------------------------------------------- yarn */
++
++describe('gauge refusal', () => {
++  it('will not price a pattern without a measured stitch count', () => {
++    const result = checkGauge({});
++    expect(result.ok).toBe(false);
++    if (!result.ok) expect(result.problem).toMatch(/measure/i);
++  });
++
++  it('rejects a physically impossible gauge rather than clamping it', () => {
++    expect(checkGauge({ stitchesPer10cm: 0 }).ok).toBe(false);
++    expect(checkGauge({ stitchesPer10cm: 400 }).ok).toBe(false);
++    expect(checkGauge({ stitchesPer10cm: 16, rowsPer10cm: 0 }).ok).toBe(false);
++  });
++
++  it('derives stitch width from the measurement', () => {
++    const result = checkGauge({ stitchesPer10cm: 20 });
++    expect(result.ok).toBe(true);
++    if (result.ok) expect(result.stitchWidthCm).toBeCloseTo(0.5, 6);
++  });
++});
++
++describe('yarn estimate', () => {
++  const pattern = parsePattern('Row 1: ch 21, sc in 2nd ch from hook and each ch across (20)');
++
++  it('prices every row and its breakdown adds up to the total', () => {
++    const result = estimateYarn(pattern, { stitchesPer10cm: 16 });
++    expect(result.ok).toBe(true);
++    if (!result.ok) return;
++    const sum = result.steps.reduce((total, step) => total + step.cm, 0);
++    expect(sum).toBeCloseTo(result.totalCm, 6);
++    expect(result.totalMetres).toBeGreaterThan(0);
++  });
++
++  it('scales linearly with stitch width, which is the whole reason a gauge is required', () => {
++    const wide = estimateYarn(pattern, { stitchesPer10cm: 8 });
++    const tight = estimateYarn(pattern, { stitchesPer10cm: 16 });
++    expect(wide.ok && tight.ok).toBe(true);
++    if (!wide.ok || !tight.ok) return;
++    // Twice the stitch width, twice the yarn, per stitch count held constant.
++    expect(wide.totalCm / tight.totalCm).toBeCloseTo(2, 6);
++  });
++
++  it('prices a taller stitch as more yarn than a short one', () => {
++    expect(YARN_PER_WIDTH.dc!).toBeGreaterThan(YARN_PER_WIDTH.sc!);
++    expect(YARN_PER_WIDTH.sc!).toBeGreaterThan(YARN_PER_WIDTH.ch!);
++  });
++
++  it('returns the gauge problem rather than a zero estimate', () => {
++    const result = estimateYarn(pattern, {});
++    expect(result.ok).toBe(false);
++  });
++
++  it('can price from a measured swatch with no gauge at all', () => {
++    const perStitch = metresPerStitch({ yarnMetres: 12, stitches: 100 });
++    expect(perStitch).toBeCloseTo(0.12, 6);
++    const result = estimateFromSwatch(pattern, perStitch!);
++    expect(result.ok).toBe(true);
++    if (result.ok) expect(result.totalMetres).toBeGreaterThan(0);
++  });
++
++  it('refuses a swatch with no stitches', () => {
++    expect(metresPerStitch({ yarnMetres: 12, stitches: 0 })).toBeNull();
++    expect(metresPerStitch({ yarnMetres: 0, stitches: 100 })).toBeNull();
++  });
++});
++
++describe('skein planning', () => {
++  it('rounds up to whole skeins', () => {
++    const plan = planSkeins({ neededMetres: 500, skeinMetres: 200, waste: 0 });
++    expect(plan.ok).toBe(true);
++    if (plan.ok) {
++      expect(plan.skeins).toBe(3);
++      expect(plan.leftoverMetres).toBeCloseTo(100, 6);
++    }
++  });
++
++  it('flags when the allowance is what pushes you over a skein boundary', () => {
++    // 400 m of yarn in 200 m skeins is exactly two skeins...
++    const bare = planSkeins({ neededMetres: 400, skeinMetres: 200, waste: 0 });
++    expect(bare.ok && bare.skeins).toBe(2);
++    // ...but with 10% allowance it is 440 m, which needs a third.
++    const withWaste = planSkeins({ neededMetres: 400, skeinMetres: 200, waste: 0.1 });
++    expect(withWaste.ok).toBe(true);
++    if (withWaste.ok) {
++      expect(withWaste.skeins).toBe(3);
++      expect(withWaste.wasteChangedCount).toBe(true);
++    }
++  });
++
++  it('does not claim the allowance changed the answer when it did not', () => {
++    const plan = planSkeins({ neededMetres: 300, skeinMetres: 200, waste: 0.1 });
++    expect(plan.ok).toBe(true);
++    if (plan.ok) {
++      expect(plan.skeins).toBe(2);
++      expect(plan.wasteChangedCount).toBe(false);
++    }
++  });
++
++  it('explains the yards/metres trap instead of dividing by zero', () => {
++    const plan = planSkeins({ neededMetres: 500, skeinMetres: 0 });
++    expect(plan.ok).toBe(false);
++    if (!plan.ok) expect(plan.problem).toMatch(/yards and metres/i);
++  });
++
++  it('rejects a nonsense allowance', () => {
++    expect(planSkeins({ neededMetres: 100, skeinMetres: 100, waste: 2 }).ok).toBe(false);
++  });
++
++  it('converts a yard label to metres', () => {
++    expect(toMetres(1, 'yd')).toBeCloseTo(0.9144, 6);
++    expect(toMetres(100, 'cm')).toBeCloseTo(1, 6);
++  });
++
++  it('formats lengths in the unit that reads best', () => {
++    expect(formatLength(0.35)).toBe('35 cm');
++    expect(formatLength(4.5)).toBe('4.50 m');
++    expect(formatLength(120.4)).toBe('120 m');
++  });
++});
++
++/* -------------------------------------------------------------- symbols */
++
++describe('symbol charts', () => {
++  it('has a distinct symbol for every stitch code the catalogue knows', () => {
++    for (const code of ['ch', 'slst', 'sc', 'hdc', 'dc', 'tr', 'dtr', 'inc', 'dec', 'bobble', 'puff', 'shell', 'cluster']) {
++      expect(symbolFor(code).label).not.toBe('not understood');
++    }
++  });
++
++  it('falls back to the error glyph for an unknown code, never blank', () => {
++    expect(symbolFor('qqq').label).toBe('not understood');
++    expect(symbolFor('qqq').paths.length).toBeGreaterThan(0);
++  });
++
++  it('draws one cell per stitch made, so an increase is a single cell worth two', () => {
++    const text = '[2 sc, inc] x 6';
++    const pattern = parsePattern(`Round 1: ${text} (24)`);
++    const chart = buildChart(pattern);
++    expect(chart.rows).toHaveLength(1);
++
++    const row = chart.rows[0]!;
++    expect(row.cells).toHaveLength(18); // 12 sc + 6 inc cells
++    expect(chartMade(row)).toBe(24); // 12 + 12 stitches made
++    expect(chartMade(row)).toBe(evaluateInstruction(text).count);
++  });
++
++  it('confirms agreement between the drawing and the maths engine', () => {
++    const pattern = parsePattern('Round 1: [sc, inc] x 6 (18)');
++    const row = buildChart(pattern).rows[0]!;
++    expect(chartAgreesWith(row, 18)).toBe(true);
++    // A count that is wrong must be reported as wrong.
++    expect(chartAgreesWith(row, 24)).toBe(false);
++    // An unknown count is unknown, not a pass.
++    expect(chartAgreesWith(row, undefined)).toBeNull();
++  });
++
++  it('marks where each repetition begins', () => {
++    const pattern = parsePattern('Round 1: [sc, inc] x 3 (9)');
++    const chart = buildChart(pattern);
++    const boundaries = repeatBoundaries(chart.rows[0]!);
++    expect(boundaries).toEqual([2, 4]);
++  });
++
++  it('reports rows it could not chart instead of dropping them quietly', () => {
++    const pattern = parsePattern('Gauge: 16 sc and 20 rows to 10 cm\nRound 1: 6 sc in mr (6)');
++    const chart = buildChart(pattern);
++    expect(chart.rows).toHaveLength(1);
++    expect(chart.skipped.length).toBeGreaterThanOrEqual(0);
++  });
++
++  it('exposes a legend without the error glyph', () => {
++    const codes = symbolLegend().map((entry) => entry.code);
++    expect(codes).not.toContain('unknown');
++    expect(codes).toContain('sc');
++  });
++});
++
++/* -------------------------------------------------------------- journal */
++
++function entry(overrides: Partial<JournalEntry>): JournalEntry {
++  return {
++    id: 'e1',
++    projectId: 'p1',
++    at: '2026-10-01T10:00:00.000Z',
++    kind: 'note',
++    text: 'hello',
++    ...overrides,
++  };
++}
++
++describe('photo sizing', () => {
++  it('scales the long edge down and preserves the aspect ratio', () => {
++    expect(fitWithin(2000, 1000, 900)).toEqual({ width: 900, height: 450 });
++    expect(fitWithin(1000, 2000, 900)).toEqual({ width: 450, height: 900 });
++  });
++
++  it('never upscales a small photo', () => {
++    expect(fitWithin(400, 300, 900)).toEqual({ width: 400, height: 300 });
++  });
++
++  it('refuses nonsense dimensions rather than producing a zero-size canvas', () => {
++    expect(fitWithin(0, 0)).toEqual({ width: 0, height: 0 });
++    expect(fitWithin(-5, 10)).toEqual({ width: 0, height: 0 });
++  });
++});
++
++describe('journal storage budget', () => {
++  it('counts base64 payload honestly, including padding', () => {
++    // "AAAA" is 3 bytes of binary in 4 base64 characters.
++    expect(dataUrlBytes('data:image/jpeg;base64,AAAA')).toBe(3 + 'data:image/jpeg;base64,'.length);
++    // "AAA=" is 2 bytes.
++    expect(dataUrlBytes('data:image/jpeg;base64,AAA=')).toBe(2 + 'data:image/jpeg;base64,'.length);
++  });
++
++  it('evicts the oldest photos first when over budget', () => {
++    const photo = (id: string, at: string, bytes: number) =>
++      entry({ id, at, kind: 'photo', image: `data:image/jpeg;base64,${'A'.repeat(bytes)}` });
++
++    const kept = trimToBudget(
++      [
++        photo('new', '2026-10-03T10:00:00.000Z', 400),
++        photo('old', '2026-10-01T10:00:00.000Z', 400),
++        entry({ id: 'note', kind: 'note', text: 'keep me' }),
++      ],
++      450,
++    );
++
++    expect(kept.dropped.map((dropped) => dropped.id)).toEqual(['old']);
++    expect(kept.kept.some((keptEntry) => keptEntry.id === 'note')).toBe(true);
++  });
++
++  it('never evicts notes, even when they outnumber photos', () => {
++    const entries = [
++      entry({ id: 'note1', kind: 'note', text: 'a' }),
++      entry({ id: 'note2', kind: 'note', text: 'b' }),
++      entry({ id: 'p', kind: 'photo', image: `data:image/jpeg;base64,${'A'.repeat(400)}` }),
++    ];
++    const result = trimToBudget(entries, 10);
++    expect(result.kept.filter((keptEntry) => keptEntry.kind === 'note')).toHaveLength(2);
++    expect(result.dropped).toHaveLength(1);
++  });
++
++  it('leaves a journal under budget untouched', () => {
++    const entries = [entry({ id: 'a' }), entry({ id: 'b' })];
++    expect(trimToBudget(entries, 1_000_000).dropped).toEqual([]);
++    expect(journalBytes(entries)).toBe(0);
++  });
++});
++
++describe('journal ordering', () => {
++  it('sorts newest first', () => {
++    const sorted = sortEntries([
++      entry({ id: 'a', at: '2026-10-01T10:00:00.000Z' }),
++      entry({ id: 'b', at: '2026-10-03T10:00:00.000Z' }),
++    ]);
++    expect(sorted.map((sortedEntry) => sortedEntry.id)).toEqual(['b', 'a']);
++  });
++
++  it('labels today and yesterday in local time', () => {
++    const now = new Date(2026, 9, 25, 21, 30);
++    const today = new Date(2026, 9, 25, 1, 0).toISOString();
++    const yesterday = new Date(2026, 9, 24, 23, 0).toISOString();
++    const groups = groupByDay([entry({ id: 't', at: today }), entry({ id: 'y', at: yesterday })], now);
++    expect(groups.map((group) => group.label)).toEqual(['Today', 'Yesterday']);
++  });
++
++  it('keeps an evening entry under today rather than tomorrow in UTC', () => {
++    const late = new Date(2026, 9, 25, 23, 45);
++    const now = new Date(2026, 9, 25, 23, 50);
++    const groups = groupByDay([entry({ id: 'late', at: late.toISOString() })], now);
++    expect(groups[0]!.label).toBe('Today');
++  });
++
++  it('adds newest first and removes by id', () => {
++    const added = addEntry([entry({ id: 'a', at: '2026-10-01T10:00:00.000Z' })], entry({
++      id: 'b',
++      at: '2026-10-02T10:00:00.000Z',
++    }));
++    expect(added[0]!.id).toBe('b');
++    expect(removeEntry(added, 'b').map((removed) => removed.id)).toEqual(['a']);
++  });
++
++  it('tracks a measurement trend between readings', () => {
++    const trend = measurementTrend(
++      [
++        entry({ id: 'a', kind: 'measure', label: 'Sleeve', text: '30', at: '2026-10-01T10:00:00.000Z' }),
++        entry({ id: 'b', kind: 'measure', label: 'Sleeve', text: '38', at: '2026-10-05T10:00:00.000Z' }),
++        entry({ id: 'c', kind: 'measure', label: 'Body', text: '50', at: '2026-10-05T10:00:00.000Z' }),
++      ],
++      'Sleeve',
++    );
++    expect(trend).toEqual({ first: 30, last: 38, delta: 8, count: 2 });
++  });
++
++  it('has no trend with a single reading', () => {
++    expect(
++      measurementTrend([entry({ kind: 'measure', label: 'Sleeve', text: '30' })], 'Sleeve'),
++    ).toBeNull();
++  });
++
++  it('lists measurement labels in the order first used', () => {
++    const labels = measurementLabels([
++      entry({ id: 'a', kind: 'measure', label: 'Body', at: '2026-10-01T10:00:00.000Z' }),
++      entry({ id: 'b', kind: 'measure', label: 'Sleeve', at: '2026-10-02T10:00:00.000Z' }),
++      entry({ id: 'c', kind: 'measure', label: 'Body', at: '2026-10-03T10:00:00.000Z' }),
++    ]);
++    expect(labels).toEqual(['Body', 'Sleeve']);
++  });
++
++  it('makes stable ids from a seed', () => {
++    expect(makeEntryId(1, 1700)).toBe(makeEntryId(1, 1700));
++    expect(makeEntryId(1, 1700)).not.toBe(makeEntryId(2, 1700));
++  });
++});
++
++/* --------------------------------------------------------------- search */
++
++describe('command palette search', () => {
++  const docs = buildIndex();
++
++  it('puts the tool above anything that merely mentions the word', () => {
++    const hits = search('gauge', docs);
++    expect(hits[0]!.doc.href).toBe('/gauge');
++  });
++
++  it('finds a tool from a subsequence of its name', () => {
++    const hits = search('chkr', docs);
++    expect(hits.some((hit) => hit.doc.href === '/checker')).toBe(true);
++  });
++
++  it('reaches a tool from a keyword that is not in its title', () => {
++    const hits = search('yardage', docs);
++    expect(hits[0]!.doc.href).toBe('/stash');
++  });
++
++  it('matches words in any order', () => {
++    const doc = { id: 'x', title: 'Easy Baby Blanket', group: 'Patterns', href: '/x' };
++    expect(scoreDoc('blanket easy', doc)).not.toBeNull();
++    expect(scoreDoc('easy blanket', doc)).not.toBeNull();
++    // A word that is absent still rejects the document.
++    expect(scoreDoc('blanket zzz', doc)).toBeNull();
++  });
++
++  it('prefers a word-start match over a match buried mid-word', () => {
++    const start = scoreText('chart', 'Chart symbols')!;
++    const buried = scoreText('chart', 'Uncharted waters')!;
++    expect(start.score).toBeGreaterThan(buried.score);
++  });
++
++  it('returns nothing for a query that is not present', () => {
++    expect(search('zzzqqq', docs)).toEqual([]);
++  });
++
++  it('returns the first docs for an empty query so the palette is never blank', () => {
++    expect(search('', docs, 5)).toHaveLength(5);
++  });
++
++  it('indexes patterns by name and by tag', () => {
++    const pattern = {
++      id: 'p-test',
++      title: 'Test Bunny',
++      craft: 'crochet',
++      category: 'Amigurumi',
++      level: 'easy',
++      minutes: 60,
++      blurb: '',
++      tags: ['toy', 'rabbit'],
++      origin: 'curated',
++      supplies: { yarn: 'DK' },
++    } as CatalogPattern;
++
++    const withPatterns = buildIndex({ patterns: [pattern] });
++    expect(search('bunny', withPatterns)[0]!.doc.href).toBe('/pattern/p-test');
++    expect(search('rabbit', withPatterns)[0]!.doc.href).toBe('/pattern/p-test');
++  });
++
++  it('includes every tool exactly once', () => {
++    const hrefs = TOOL_DOCS.map((doc) => doc.href);
++    expect(new Set(hrefs).size).toBe(hrefs.length);
 +  });
 +});
 diff --git a/web/studio/src/tests/fixtures.ts b/web/studio/src/tests/fixtures.ts

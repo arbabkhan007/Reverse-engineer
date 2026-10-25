@@ -14,8 +14,11 @@ import type {
   CustomPatternRecord,
   ParsedPattern,
   Project,
+  JournalRecord,
   SavedStitchAnalysis,
   Settings,
+  StashYarn,
+  YarnPlan,
 } from '../shared/types.ts';
 import { defaultState, loadState, saveState, todayKey } from './lib/storage.ts';
 
@@ -43,6 +46,13 @@ interface StoreValue {
   deleteCanvas: (id: string) => void;
   saveStitchAnalysis: (analysis: SavedStitchAnalysis) => void;
   deleteStitchAnalysis: (id: string) => void;
+  addStashYarn: (yarn: Omit<StashYarn, 'id' | 'addedAt'>) => StashYarn;
+  updateStashYarn: (id: string, patch: Partial<StashYarn>) => void;
+  deleteStashYarn: (id: string) => void;
+  saveYarnPlan: (plan: Omit<YarnPlan, 'id' | 'createdAt'>) => void;
+  deleteYarnPlan: (id: string) => void;
+  addJournalEntry: (entry: Omit<JournalRecord, 'id'>) => void;
+  deleteJournalEntry: (id: string) => void;
   exportData: () => string;
   importData: (json: string) => { ok: boolean; message: string };
   resetAll: () => void;
@@ -190,6 +200,39 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
       deleteStitchAnalysis: (id) =>
         setState((c) => ({ ...c, stitchAnalyses: c.stitchAnalyses.filter((a) => a.id !== id) })),
+
+      addStashYarn: (yarn) => {
+        const record: StashYarn = { ...yarn, id: uid(), addedAt: Date.now() };
+        setState((c) => ({ ...c, stash: [record, ...c.stash] }));
+        return record;
+      },
+
+      updateStashYarn: (id, patch) =>
+        setState((c) => ({
+          ...c,
+          stash: c.stash.map((yarn) => (yarn.id === id ? { ...yarn, ...patch } : yarn)),
+        })),
+
+      deleteStashYarn: (id) =>
+        setState((c) => ({ ...c, stash: c.stash.filter((yarn) => yarn.id !== id) })),
+
+      saveYarnPlan: (plan) =>
+        setState((c) => ({
+          ...c,
+          yarnPlans: [{ ...plan, id: uid(), createdAt: Date.now() }, ...c.yarnPlans].slice(0, 40),
+        })),
+
+      deleteYarnPlan: (id) =>
+        setState((c) => ({ ...c, yarnPlans: c.yarnPlans.filter((plan) => plan.id !== id) })),
+
+      addJournalEntry: (entry) =>
+        setState((c) => ({
+          ...c,
+          journal: [{ ...entry, id: uid() }, ...c.journal].slice(0, 2000),
+        })),
+
+      deleteJournalEntry: (id) =>
+        setState((c) => ({ ...c, journal: c.journal.filter((entry) => entry.id !== id) })),
 
       exportData: () => JSON.stringify(state, null, 2),
 

@@ -50,9 +50,10 @@ Verified against a fresh clone of `main`: patch applies, `npm run build` succeed
 ### Features in the studio
 
 Pattern library (526 patterns), stitch-maths checker, PDF and web import, row counter with making
-time, photo texture aid, pattern canvas, five courses, **US/UK dialect translator with a count-safety
-check**, **gauge and sizing calculator**, **image-to-chart converter**, **hands-free read-aloud**, and
-a print stylesheet.
+time, photo texture aid, pattern canvas, five courses, US/UK dialect translator with a count-safety
+check, gauge and sizing calculator, image-to-chart converter, hands-free read-aloud, print stylesheet,
+**yarn stash and skein planner**, **written-to-symbol chart rendering**, **project journal with
+photo budgeting**, **Ctrl/⌘+K command palette**, and **offline support via a service worker**.
 
 ### Why `/api/import/url` is included
 

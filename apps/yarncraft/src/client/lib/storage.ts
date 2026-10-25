@@ -21,6 +21,9 @@ export function defaultState(): AppState {
     canvases: [],
     stitchAnalyses: [],
     activity: {},
+    stash: [],
+    yarnPlans: [],
+    journal: [],
   };
 }
 
@@ -43,6 +46,9 @@ export function loadState(): AppState {
       recentPatterns: parsed.recentPatterns ?? [],
       courseProgress: parsed.courseProgress ?? {},
       activity: parsed.activity ?? {},
+      stash: parsed.stash ?? [],
+      yarnPlans: parsed.yarnPlans ?? [],
+      journal: parsed.journal ?? [],
     };
   } catch {
     return defaultState();

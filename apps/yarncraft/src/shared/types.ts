@@ -212,6 +212,56 @@ export interface Project {
   elapsedSeconds: number;
 }
 
+/* ------------------------------------------------------------------- stash */
+
+/** One yarn the maker owns, or is thinking of buying. */
+export interface StashYarn {
+  id: string;
+  name: string;
+  brand?: string;
+  /** Yarn weight code from the standard 0-7 scale. */
+  weight: string;
+  /** Total length of one skein, in metres. Metres so yards/labels compare. */
+  skeinMetres: number;
+  /** Skeins on hand. */
+  skeins: number;
+  colour?: string;
+  /** Purchase price per skein, in the user's currency. */
+  pricePerSkein?: number;
+  notes?: string;
+  addedAt: number;
+}
+
+/** A saved yarn requirement, so a plan can be revisited after buying. */
+export interface YarnPlan {
+  id: string;
+  name: string;
+  neededMetres: number;
+  skeinMetres: number;
+  skeins: number;
+  createdAt: number;
+}
+
+/* ----------------------------------------------------------------- journal */
+
+export type JournalKind = 'note' | 'photo' | 'measure' | 'milestone';
+
+/**
+ * One journal entry. Kept in `shared` rather than imported from the domain so
+ * the persisted shape never depends on a domain module's internals.
+ */
+export interface JournalRecord {
+  id: string;
+  projectId: string;
+  at: string;
+  kind: JournalKind;
+  text: string;
+  image?: string;
+  width?: number;
+  height?: number;
+  label?: string;
+}
+
 /* ------------------------------------------------------------------ canvas */
 
 export const CANVAS_SYMBOLS = [
@@ -326,4 +376,10 @@ export interface AppState {
   stitchAnalyses: SavedStitchAnalysis[];
   /** ISO date (YYYY-MM-DD) -> rows completed that day. */
   activity: Record<string, number>;
+  /** Yarns on hand. */
+  stash: StashYarn[];
+  /** Saved yarn requirement plans. */
+  yarnPlans: YarnPlan[];
+  /** Journal entries across all projects. */
+  journal: JournalRecord[];
 }
